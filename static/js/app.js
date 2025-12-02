@@ -13,6 +13,9 @@ let currentQuote = null;
 let currentColor = null;
 let currentDrink = null;
 let currentBirthDate = null;
+let lastLoadedDate = null; // 마지막으로 로드한 날짜
+let midnightTimer = null; // 자정 타이머
+let dateCheckInterval = null; // 날짜 확인 인터벌
 
 // DOM 요소
 const birthdayForm = document.getElementById('birthdayForm');
@@ -67,6 +70,58 @@ function adjustFloatingButtons() {
     }
 }
 
+// 자정까지 남은 시간 계산 (밀리초)
+function getMillisecondsUntilMidnight() {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0); // 다음 자정
+    return midnight.getTime() - now.getTime();
+}
+
+// 자정 자동 새로고침 설정
+function setupMidnightAutoRefresh() {
+    // 기존 타이머가 있으면 제거
+    if (midnightTimer) {
+        clearTimeout(midnightTimer);
+    }
+    
+    const msUntilMidnight = getMillisecondsUntilMidnight();
+    
+    console.log(`자정 자동 새로고침 설정: ${Math.floor(msUntilMidnight / 1000 / 60)}분 후`);
+    
+    midnightTimer = setTimeout(() => {
+        console.log('자정 도달! 자동으로 새로운 명언을 불러옵니다...');
+        loadDailyQuote();
+        
+        // 다음 자정을 위해 다시 설정
+        setupMidnightAutoRefresh();
+    }, msUntilMidnight);
+}
+
+// 날짜 확인 및 자동 업데이트
+function checkDateAndUpdate() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    
+    // 날짜가 바뀌었으면 자동 업데이트
+    if (lastLoadedDate && lastLoadedDate !== today) {
+        console.log(`날짜가 변경되었습니다 (${lastLoadedDate} → ${today}). 자동으로 업데이트합니다.`);
+        loadDailyQuote();
+    }
+}
+
+// 날짜 확인 인터벌 설정 (1분마다 확인)
+function setupDateCheckInterval() {
+    // 기존 인터벌이 있으면 제거
+    if (dateCheckInterval) {
+        clearInterval(dateCheckInterval);
+    }
+    
+    // 1분마다 날짜 확인
+    dateCheckInterval = setInterval(() => {
+        checkDateAndUpdate();
+    }, 60 * 1000); // 1분 = 60,000ms
+}
+
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
     // 저장된 생년월일 확인
@@ -89,6 +144,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('생년월일 조회 오류:', error);
     }
     
+    // 자정 자동 새로고침 설정
+    setupMidnightAutoRefresh();
+    
+    // 날짜 확인 인터벌 설정
+    setupDateCheckInterval();
+    
     // 플로팅 버튼 위치 조정
     adjustFloatingButtons();
     
@@ -98,6 +159,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // 컨텐츠 로드 후에도 위치 조정
     setTimeout(adjustFloatingButtons, 100);
+    
+    // 페이지가 보일 때 포커스 이벤트로 날짜 확인 (탭 전환 시)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            checkDateAndUpdate();
+        }
+    });
 });
 
 // 생년월일 저장 확인
@@ -222,6 +290,13 @@ async function loadDailyQuote() {
             if (data.data.drink) {
                 displayDrink(data.data.drink);
             }
+            
+            // 로드한 날짜 저장
+            const today = new Date().toISOString().split('T')[0];
+            lastLoadedDate = today;
+            
+            // 자정 타이머 재설정 (새로운 날짜가 로드되었으므로)
+            setupMidnightAutoRefresh();
         } else {
             if (data.requires_birthday) {
                 // 생년월일 입력 필요
