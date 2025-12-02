@@ -290,6 +290,9 @@ async function loadDailyQuote() {
             if (data.data.drink) {
                 displayDrink(data.data.drink);
             }
+            if (data.data.shopping_items && data.data.shopping_items.length > 0) {
+                displayShoppingItems(data.data.shopping_items);
+            }
             
             // 로드한 날짜 저장
             const today = new Date().toISOString().split('T')[0];
@@ -389,6 +392,51 @@ function displayColor(color) {
     
     // 화면 톤 변경
     applyColorTheme(color);
+}
+
+// 추천 쇼핑 아이템 표시 (items[0]만 사용)
+function displayShoppingItems(items) {
+    const shoppingCard = document.getElementById('shoppingCard');
+    const shoppingContent = document.getElementById('shoppingContent');
+    
+    if (!items || items.length === 0) {
+        shoppingCard.style.display = 'none';
+        return;
+    }
+    
+    // items[0]만 사용
+    const item = items[0];
+    
+    // 이미지가 있으면 이미지 포함 카드, 없으면 기본 카드
+    let itemHTML = '';
+    if (item.image) {
+        itemHTML = `
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shopping-item shopping-item-with-image">
+                <div class="shopping-item-image-wrapper">
+                    <img src="${item.image}" alt="${item.name}" class="shopping-item-image" onerror="this.style.display='none'">
+                </div>
+                <div class="shopping-item-info">
+                    <div class="shopping-item-category">${item.category || ''}</div>
+                    <div class="shopping-item-name">${item.name}</div>
+                    ${item.price ? `<div class="shopping-item-price">${parseInt(item.price).toLocaleString()}원</div>` : ''}
+                    ${item.mallName ? `<div class="shopping-item-mall">${item.mallName}</div>` : ''}
+                    <div class="shopping-item-link">네이버 쇼핑에서 보기 →</div>
+                </div>
+            </a>
+        `;
+    } else {
+        itemHTML = `
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shopping-item">
+                <div class="shopping-item-category">${item.category || ''}</div>
+                <div class="shopping-item-name">${item.name}</div>
+                ${item.price ? `<div class="shopping-item-price">${parseInt(item.price).toLocaleString()}원</div>` : ''}
+                <div class="shopping-item-link">네이버 쇼핑에서 보기 →</div>
+            </a>
+        `;
+    }
+    
+    shoppingContent.innerHTML = `<div class="shopping-items">${itemHTML}</div>`;
+    shoppingCard.style.display = 'block';
 }
 
 // 오늘의 한잔 표시

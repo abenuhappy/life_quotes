@@ -15,6 +15,7 @@ from quote_fetcher import QuoteFetcher
 from birthday_analyzer import BirthdayAnalyzer
 from color_suggester import ColorSuggester
 from drink_suggester import DrinkSuggester
+from shopping_suggester import ShoppingSuggester
 
 app = Flask(__name__,
             template_folder='templates',
@@ -66,6 +67,14 @@ def generate_short_code(url, length=6):
 quote_fetcher = QuoteFetcher()
 color_suggester = ColorSuggester()
 drink_suggester = DrinkSuggester()
+
+# 네이버 쇼핑 API 키 설정 (환경 변수 또는 직접 설정)
+NAVER_CLIENT_ID = os.environ.get('NAVER_CLIENT_ID', '6uQXc6h4TnSMVS_h5ooY')
+NAVER_CLIENT_SECRET = os.environ.get('NAVER_CLIENT_SECRET', 'zBXyXbIxN4')
+shopping_suggester = ShoppingSuggester(
+    client_id=NAVER_CLIENT_ID,
+    client_secret=NAVER_CLIENT_SECRET
+)
 
 # 사용자별 생년월일 저장 (실제로는 DB 사용 권장)
 user_birthdays = {}
@@ -294,6 +303,15 @@ def get_daily():
             print(f"음료 추천 오류: {e}")
             drink = None
         
+        # 오늘의 쇼핑 아이템 추천 (items[0]만 사용)
+        try:
+            shopping_items = shopping_suggester.suggest_shopping_items(birth_date, num_items=1)
+        except Exception as e:
+            print(f"쇼핑 아이템 추천 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            shopping_items = []
+        
         return jsonify({
             'success': True,
             'data': {
@@ -301,6 +319,7 @@ def get_daily():
                 'analysis': analysis,
                 'color': color,
                 'drink': drink,
+                'shopping_items': shopping_items,
                 'date': datetime.now().strftime('%Y-%m-%d')
             }
         })
