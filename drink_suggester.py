@@ -4,7 +4,15 @@
 """
 import hashlib
 from datetime import datetime
+import pytz
 from typing import Dict, Optional
+
+# 한국시간대 설정
+KST = pytz.timezone('Asia/Seoul')
+
+def get_kst_now():
+    """한국시간(KST) 기준 현재 시간 반환"""
+    return datetime.now(KST)
 
 
 class DrinkSuggester:
@@ -128,7 +136,7 @@ class DrinkSuggester:
             음료 정보 딕셔너리
         """
         if date_str is None:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = get_kst_now().strftime('%Y-%m-%d')
         
         # 날짜와 생년월일을 조합하여 시드 생성
         seed_str = f"{date_str}_{birth_date}_drink"
@@ -139,8 +147,8 @@ class DrinkSuggester:
         month = birth_dt.month
         day = birth_dt.day
         
-        # 시간대별 추천 (오전/오후/저녁)
-        current_hour = datetime.now().hour
+        # 시간대별 추천 (오전/오후/저녁) - 한국시간 기준
+        current_hour = get_kst_now().hour
         if current_hour < 12:
             time_of_day = 'morning'
         elif current_hour < 18:

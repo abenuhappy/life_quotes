@@ -9,8 +9,16 @@ import random
 import time
 import hashlib
 from datetime import datetime
+import pytz
 from typing import Dict, Optional, List
 import json
+
+# 한국시간대 설정
+KST = pytz.timezone('Asia/Seoul')
+
+def get_kst_now():
+    """한국시간(KST) 기준 현재 시간 반환"""
+    return datetime.now(KST)
 
 
 class QuoteFetcher:
@@ -1475,7 +1483,7 @@ class QuoteFetcher:
         생년월일이 다르면 다른 명언 반환
         """
         if date_str is None:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = get_kst_now().strftime('%Y-%m-%d')
         
         # 날짜와 생년월일을 조합하여 시드 생성
         # 생년월일이 있으면 포함, 없으면 날짜만 사용
@@ -1528,7 +1536,7 @@ class QuoteFetcher:
         prefer_poem = (seed_mod == 0)  # 33% 확률로 시 선택
         
         quote = self.fetch_quote(prefer_korean=prefer_korean, prefer_poem=prefer_poem)
-        quote['date'] = datetime.now().strftime('%Y-%m-%d')
+        quote['date'] = get_kst_now().strftime('%Y-%m-%d')
         
         return quote
 

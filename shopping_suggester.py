@@ -6,8 +6,16 @@
 import hashlib
 import requests
 from datetime import datetime
+import pytz
 from typing import Dict, Optional, List
 import urllib.parse
+
+# 한국시간대 설정
+KST = pytz.timezone('Asia/Seoul')
+
+def get_kst_now():
+    """한국시간(KST) 기준 현재 시간 반환"""
+    return datetime.now(KST)
 
 
 class ShoppingSuggester:
@@ -114,19 +122,21 @@ class ShoppingSuggester:
     def suggest_shopping_items(self, birth_date: str, date_str: Optional[str] = None, num_items: int = 1) -> List[Dict]:
         """
         생년월일과 날짜 기반으로 오늘의 쇼핑 아이템 추천
+        날짜가 바뀌면 다른 아이템이 추천됩니다.
         
         Args:
             birth_date: 생년월일 (YYYY-MM-DD)
             date_str: 날짜 (YYYY-MM-DD), None이면 오늘 날짜
-            num_items: 추천할 아이템 개수 (기본 3개)
+            num_items: 추천할 아이템 개수 (기본 1개)
         
         Returns:
             쇼핑 아이템 리스트 (각 아이템은 name, category, search_url 포함)
         """
         if date_str is None:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = get_kst_now().strftime('%Y-%m-%d')
         
         # 날짜와 생년월일을 조합하여 시드 생성
+        # 날짜가 바뀌면 완전히 다른 시드가 생성되어 다른 추천이 나옴
         seed_str = f"{date_str}_{birth_date}_shopping"
         seed_hash = int(hashlib.md5(seed_str.encode()).hexdigest(), 16)
         
@@ -145,17 +155,26 @@ class ShoppingSuggester:
         else:
             season = '가을'
         
-        # 카테고리 선택 (시드 기반)
+        # 카테고리 선택 (시드 기반 - 날짜가 바뀌면 다른 카테고리 선택)
         categories = list(self.SHOPPING_ITEMS.keys())
         selected_items = []
         
-        # 첫 번째 아이템만 선택 (네이버 API 호출)
-        category_idx = seed_hash % len(categories)
+        # 날짜별로 다른 카테고리와 아이템 조합 생성
+        import random
+        random.seed(seed_hash)  # 시드 설정으로 동일한 날짜면 동일한 결과
+        
+        # 카테고리 선택 (시드 기반 - 날짜가 바뀌면 다른 카테고리)
+        # 시드의 다른 부분을 사용하여 카테고리 선택
+        category_seed = seed_hash % (2**16)  # 하위 16비트 사용
+        category_idx = category_seed % len(categories)
         category = categories[category_idx]
         
-        # 해당 카테고리에서 아이템 선택
+        # 해당 카테고리에서 아이템 선택 (날짜별로 다른 아이템)
         items = self.SHOPPING_ITEMS[category]
-        item_idx = seed_hash % len(items)
+        # 시드의 상위 비트를 사용하여 아이템 선택 (카테고리와 독립적으로)
+        item_seed = (seed_hash >> 16) % (2**16)  # 상위 16비트 사용
+        random.seed(item_seed)
+        item_idx = random.randint(0, len(items) - 1)
         item_name = items[item_idx]
         
         # 네이버 쇼핑 API로 실제 상품 검색

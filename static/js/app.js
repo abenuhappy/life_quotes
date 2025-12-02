@@ -70,10 +70,19 @@ function adjustFloatingButtons() {
     }
 }
 
-// 자정까지 남은 시간 계산 (밀리초)
-function getMillisecondsUntilMidnight() {
+// 한국시간(KST) 기준 현재 시간 가져오기
+function getKSTNow() {
     const now = new Date();
-    const midnight = new Date();
+    // UTC 시간을 가져와서 KST(UTC+9)로 변환
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+    const kstOffset = 9 * 60 * 60 * 1000; // 9시간을 밀리초로 변환
+    return new Date(utcTime + kstOffset);
+}
+
+// 자정까지 남은 시간 계산 (밀리초) - 한국시간 기준
+function getMillisecondsUntilMidnight() {
+    const now = getKSTNow();
+    const midnight = new Date(now);
     midnight.setHours(24, 0, 0, 0); // 다음 자정
     return midnight.getTime() - now.getTime();
 }
@@ -98,9 +107,18 @@ function setupMidnightAutoRefresh() {
     }, msUntilMidnight);
 }
 
-// 날짜 확인 및 자동 업데이트
+// 한국시간 기준 오늘 날짜 가져오기 (YYYY-MM-DD)
+function getKSTToday() {
+    const kstNow = getKSTNow();
+    const year = kstNow.getFullYear();
+    const month = String(kstNow.getMonth() + 1).padStart(2, '0');
+    const day = String(kstNow.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 날짜 확인 및 자동 업데이트 - 한국시간 기준
 function checkDateAndUpdate() {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    const today = getKSTToday(); // 한국시간 기준 오늘 날짜
     
     // 날짜가 바뀌었으면 자동 업데이트
     if (lastLoadedDate && lastLoadedDate !== today) {
@@ -294,8 +312,8 @@ async function loadDailyQuote() {
                 displayShoppingItems(data.data.shopping_items);
             }
             
-            // 로드한 날짜 저장
-            const today = new Date().toISOString().split('T')[0];
+            // 로드한 날짜 저장 (한국시간 기준)
+            const today = getKSTToday();
             lastLoadedDate = today;
             
             // 자정 타이머 재설정 (새로운 날짜가 로드되었으므로)

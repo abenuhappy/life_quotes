@@ -4,7 +4,15 @@
 """
 import hashlib
 from datetime import datetime
+import pytz
 from typing import Dict, Optional, Tuple
+
+# 한국시간대 설정
+KST = pytz.timezone('Asia/Seoul')
+
+def get_kst_now():
+    """한국시간(KST) 기준 현재 시간 반환"""
+    return datetime.now(KST)
 
 
 class ColorSuggester:
@@ -95,7 +103,7 @@ class ColorSuggester:
             컬러 정보 딕셔너리
         """
         if date_str is None:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = get_kst_now().strftime('%Y-%m-%d')
         
         # 날짜와 생년월일을 조합하여 시드 생성
         seed_str = f"{date_str}_{birth_date}_color"

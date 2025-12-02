@@ -11,11 +11,19 @@ import hashlib
 import string
 import random
 from datetime import datetime
+import pytz
 from quote_fetcher import QuoteFetcher
 from birthday_analyzer import BirthdayAnalyzer
 from color_suggester import ColorSuggester
 from drink_suggester import DrinkSuggester
 from shopping_suggester import ShoppingSuggester
+
+# 한국시간대 설정
+KST = pytz.timezone('Asia/Seoul')
+
+def get_kst_now():
+    """한국시간(KST) 기준 현재 시간 반환"""
+    return datetime.now(KST)
 
 app = Flask(__name__,
             template_folder='templates',
@@ -115,7 +123,7 @@ def save_birthday():
         # 파일로도 저장 (영구 보존)
         file_path = os.path.join(DATA_FOLDER, f'{user_id}_birthday.json')
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump({'birth_date': birth_date, 'saved_at': datetime.now().isoformat()}, f, ensure_ascii=False)
+            json.dump({'birth_date': birth_date, 'saved_at': get_kst_now().isoformat()}, f, ensure_ascii=False)
         
         return jsonify({
             'success': True,
@@ -320,7 +328,7 @@ def get_daily():
                 'color': color,
                 'drink': drink,
                 'shopping_items': shopping_items,
-                'date': datetime.now().strftime('%Y-%m-%d')
+                'date': get_kst_now().strftime('%Y-%m-%d')
             }
         })
     except ValueError as e:
@@ -384,7 +392,7 @@ def shorten_url():
         # 단축 URL 저장
         short_urls[short_code] = {
             'original_url': original_url,
-            'created_at': datetime.now().isoformat()
+            'created_at': get_kst_now().isoformat()
         }
         save_short_urls(short_urls)
         
