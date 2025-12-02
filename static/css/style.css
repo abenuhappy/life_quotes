@@ -1,0 +1,838 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --theme-color: #667eea;
+    --theme-gradient-1: #667eea;
+    --theme-gradient-2: #764ba2;
+    --theme-rgb: 102, 126, 234;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--theme-gradient-1) 0%, var(--theme-gradient-2) 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+    transition: background 0.5s ease;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    position: relative;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: var(--theme-color);
+    margin-bottom: 10px;
+    transition: color 0.5s ease;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 1;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1em;
+}
+
+section {
+    margin-bottom: 30px;
+}
+
+.birthday-section {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-group input[type="date"]:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: var(--theme-color);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--theme-gradient-2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--theme-rgb), 0.4);
+}
+
+.btn-secondary {
+    background: #764ba2;
+    color: white;
+    flex: 1;
+}
+
+.btn-secondary:hover {
+    background: #5d3a7e;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+}
+
+.btn-edit {
+    background: #28a745;
+    color: white;
+    flex: 1;
+}
+
+.btn-edit:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-share {
+    background: var(--theme-color);
+    color: white;
+    position: relative;
+    flex: 1;
+}
+
+.btn-share:hover {
+    background: var(--theme-color);
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--theme-rgb), 0.4);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    color: #333;
+    text-align: left;
+    width: 100%;
+}
+
+.share-option:hover {
+    background: var(--theme-color);
+    color: white;
+    transform: translateX(5px);
+}
+
+.share-icon {
+    font-size: 1.3em;
+}
+
+.copy-success-message {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #28a745;
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.95em;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+
+.button-group {
+    position: relative;
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* 플로팅 버튼들 */
+.floating-buttons {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+}
+
+.floating-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    font-size: 1.5em;
+    padding: 0;
+}
+
+.floating-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.floating-btn:active {
+    transform: translateY(-1px);
+}
+
+.floating-btn-icon {
+    line-height: 1;
+    font-size: 1.3em;
+}
+
+.floating-btn-edit {
+    background: #28a745;
+    color: white;
+}
+
+.floating-btn-edit:hover {
+    background: #218838;
+}
+
+.floating-btn-share {
+    background: var(--theme-color);
+    color: white;
+}
+
+.floating-btn-share:hover {
+    background: var(--theme-color);
+    opacity: 0.9;
+}
+
+/* 공유 메뉴 위치 조정 (플로팅 버튼 기준) */
+.share-menu {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    min-width: 200px;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    
+    .floating-buttons {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .floating-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+    }
+    
+    .floating-btn-icon {
+        font-size: 1.2em;
+    }
+    
+    .share-menu {
+        bottom: 90px;
+        right: 20px;
+        min-width: 180px;
+    }
+}
+
+.message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    display: none;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+.quote-card {
+    background: linear-gradient(135deg, var(--theme-gradient-1) 0%, var(--theme-gradient-2) 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: background 0.5s ease;
+    position: relative;
+    /* 배경 어둡게 처리 (오버레이) */
+}
+
+.quote-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.quote-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-floating {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 25px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.btn-floating:hover {
+    background: transparent;
+    transform: translateY(-2px);
+    box-shadow: none;
+    opacity: 0.8;
+}
+
+.btn-floating:active {
+    transform: translateY(0);
+}
+
+.floating-text {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: white;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.refresh-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+}
+
+.btn-floating:hover .refresh-icon {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 600px) {
+    .refresh-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.quote-header {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+}
+
+.quote-type {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.quote-content {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.quote-text {
+    font-size: 2.2em;
+    line-height: 2.2;
+    margin-bottom: 25px;
+    font-style: normal;
+    white-space: pre-line;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    /* 텍스트 그림자 추가 (가독성 향상) */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.5);
+    /* 감성적인 폰트 적용 */
+    font-family: 'Nanum Myeongjo', 'Noto Serif KR', 'Georgia', 'Times New Roman', serif;
+}
+
+.quote-author {
+    font-size: 1.2em;
+    opacity: 0.95;
+    font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.quote-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.quote-date {
+    font-size: 0.95em;
+    opacity: 0.95;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.color-card {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.color-card h3 {
+    color: var(--theme-color);
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: 700;
+    transition: color 0.5s ease;
+}
+
+.color-preview {
+    width: 100%;
+    min-height: 200px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    padding: 30px 20px;
+}
+
+.color-info-wrapper {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.color-info {
+    text-align: center;
+    background: transparent;
+    padding: 30px 20px;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.color-info h4 {
+    font-size: 1.8em;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 700;
+}
+
+.color-hex {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin: 8px 0;
+    color: #999;
+    opacity: 0.8;
+}
+
+.color-source {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.color-meaning {
+    background: transparent;
+    padding: 0 20px 30px;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    margin-top: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.color-meaning p {
+    color: #555;
+    line-height: 1.8;
+    font-size: 1.1em;
+    text-align: center;
+    margin: 0;
+    font-weight: 500;
+}
+
+.analysis-card {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.color-card h3 {
+    color: var(--theme-color);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    transition: color 0.5s ease;
+}
+
+.drink-card {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.drink-card h3 {
+    color: var(--theme-color);
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: 700;
+    transition: color 0.5s ease;
+}
+
+.drink-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.drink-info {
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 35px 20px;
+    box-shadow: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.drink-emoji {
+    font-size: 7.2em;
+    margin-bottom: 20px;
+    line-height: 1;
+}
+
+.drink-info h4 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.drink-type {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.drink-time {
+    font-size: 0.95em;
+    color: #666;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.drink-description {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px 20px;
+    box-shadow: none;
+    border-radius: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.drink-description p {
+    color: #555;
+    line-height: 1.8;
+    font-size: 1.1em;
+    text-align: center;
+    margin: 0;
+    font-weight: 500;
+}
+
+.analysis-card h3 {
+    color: var(--theme-color);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    transition: color 0.5s ease;
+}
+
+.analysis-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.analysis-item {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-item h4 {
+    color: var(--theme-color);
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    transition: color 0.5s ease;
+}
+
+.analysis-item p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+/* 광고 섹션 */
+.ad-section {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 2px solid #d0d0d0;
+    text-align: center;
+    position: relative;
+    /* 콘텐츠와 명확히 구분 */
+    background: linear-gradient(to bottom, transparent 0%, rgba(248, 249, 250, 0.5) 100%);
+    padding-bottom: 30px;
+}
+
+.ad-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.7em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.ad-content {
+    display: inline-block;
+    max-width: 100%;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    margin: 0 auto;
+    border: 1px solid #e0e0e0;
+}
+
+.ad-image {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 600px) {
+    .ad-image {
+        max-width: 150px;
+    }
+    
+    .ad-label {
+        top: 5px;
+        right: 5px;
+        font-size: 0.65em;
+        padding: 2px 6px;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    .quote-text {
+        font-size: 1.2em;
+        line-height: 2.0;
+    }
+    
+    .refresh-icon {
+        font-size: 1.3em;
+    }
+    
+    .drink-emoji {
+        font-size: 5.5em;
+    }
+
+    .analysis-content {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-floating {
+        padding: 10px 16px;
+        min-width: 44px;
+        min-height: 44px;
+        top: 15px;
+        right: 15px;
+    }
+
+    .floating-text {
+        font-size: 0.8em;
+    }
+}
+

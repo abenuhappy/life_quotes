@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생년월일 기반 매일 명언/시</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 오늘, 나에게 들려주는 한 줄</h1>
+            <p class="subtitle" id="subtitle">생년월일에 맞춘 매일 다른 명언 또는 시를 제공합니다</p>
+        </header>
+
+        <!-- 생년월일 입력 섹션 -->
+        <section class="birthday-section" id="birthdaySection">
+            <h2>생년월일 입력</h2>
+            <form id="birthdayForm">
+                <div class="form-group">
+                    <label for="birthDate">생년월일</label>
+                    <input type="date" id="birthDate" name="birthDate" required>
+                </div>
+                <button type="submit" class="btn btn-primary">저장하기</button>
+            </form>
+            <div id="birthdayMessage" class="message"></div>
+        </section>
+
+        <!-- 명언/시 표시 섹션 -->
+        <section class="quote-section" id="quoteSection" style="display: none;">
+            <div class="quote-card">
+                <button class="btn-floating" id="refreshBtn" title="다른 한 줄 보기">
+                    <img src="{{ url_for('static', filename='images/refresh.png') }}" alt="새로고침" class="refresh-icon">
+                </button>
+                <div class="quote-header">
+                    <span class="quote-type" id="quoteType">명언</span>
+                </div>
+                <div class="quote-content" id="quoteContent">
+                    <p class="quote-text" id="quoteText"></p>
+                    <p class="quote-author" id="quoteAuthor"></p>
+                </div>
+                <div class="quote-footer">
+                    <span class="quote-date" id="quoteDate"></span>
+                </div>
+            </div>
+
+            <!-- 오늘의 컬러 -->
+            <div class="color-card" id="colorCard" style="display: none;">
+                <h3>오늘의 컬러</h3>
+                <div class="color-content" id="colorContent"></div>
+            </div>
+
+            <!-- 오늘의 한잔 -->
+            <div class="drink-card" id="drinkCard" style="display: none;">
+                <h3>오늘의 한잔</h3>
+                <div class="drink-content" id="drinkContent"></div>
+            </div>
+
+            <!-- 생년월일 분석 정보 -->
+            <div class="analysis-card" id="analysisCard" style="display: none;">
+                <h3>📊 생년월일 분석</h3>
+                <div class="analysis-content" id="analysisContent"></div>
+            </div>
+
+            <!-- 플로팅 버튼들 -->
+            <div class="floating-buttons">
+                <button class="floating-btn floating-btn-edit" id="editBirthdayBtn" title="생년월일 변경하기">
+                    <span class="floating-btn-icon">✏️</span>
+                </button>
+                <button class="floating-btn floating-btn-share" id="shareBtn" title="공유하기">
+                    <span class="floating-btn-icon">🔗</span>
+                </button>
+            </div>
+            
+            <!-- 공유 메뉴 (드롭다운) -->
+            <div class="share-menu" id="shareMenu" style="display: none;">
+                <button class="share-option" id="copyUrlBtn">
+                    <span class="share-icon">🔗</span>
+                    <span>URL 복사하기</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 로딩 표시 -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>로딩 중...</p>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        
+        <!-- 광고 섹션 -->
+        <div class="ad-section">
+            <div class="ad-label">AD</div>
+            <div class="ad-content">
+                <img src="{{ url_for('static', filename='images/hoin_logo.png') }}" alt="HOIN - Good Person, Good Coffee" class="ad-image">
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
