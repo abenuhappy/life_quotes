@@ -497,18 +497,31 @@ def generate_og_image():
             font_medium = None
             font_small = None
             
+            # 프로젝트 내 폰트 경로 (최우선)
+            project_font_dir = os.path.join(app.static_folder, 'fonts')
+            
             # 다양한 플랫폼의 폰트 경로 시도
             font_paths = [
+                # 프로젝트 내 폰트 (최우선)
+                os.path.join(project_font_dir, 'NotoSansKR-Bold.otf'),
+                os.path.join(project_font_dir, 'NotoSansKR-Regular.otf'),
+                os.path.join(project_font_dir, 'NanumGothic-Bold.ttf'),
+                os.path.join(project_font_dir, 'NanumGothic-Regular.ttf'),
+                os.path.join(project_font_dir, 'AppleGothic.ttf'),
                 # macOS
                 "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
                 "/System/Library/Fonts/AppleGothic.ttf",
                 "/Library/Fonts/AppleGothic.ttf",
-                # Linux (Render 환경)
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+                # Linux (Render 환경) - Noto Sans CJK는 한글 지원
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
                 "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/nanum/NanumGothic-Bold.ttf",
+                "/usr/share/fonts/truetype/nanum/NanumGothic-Regular.ttf",
                 # Windows (일반적인 경로)
                 "C:/Windows/Fonts/malgun.ttf",  # 맑은 고딕
+                "C:/Windows/Fonts/malgunbd.ttf",  # 맑은 고딕 Bold
                 "C:/Windows/Fonts/gulim.ttc",   # 굴림
             ]
             
