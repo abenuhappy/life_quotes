@@ -466,200 +466,35 @@ def redirect_short_url(short_code):
 
 @app.route('/og-image')
 def generate_og_image():
-    """오늘을 강조하는 OG 이미지 생성"""
+    """OG 이미지 반환 (정적 이미지 사용)"""
     try:
-        # 이미지 크기 (카카오톡 권장: 1200x630)
-        width, height = 1200, 630
+        # 정적 이미지 파일 경로
+        og_image_path = os.path.join(app.static_folder, 'images', 'og_image.png')
         
-        # PIL로 이미지 생성 시도
-        if not HAS_PIL:
-            # PIL이 없는 경우 기본 이미지 반환
-            default_image_path = os.path.join(app.static_folder, 'images', 'og_default.png')
-            if os.path.exists(default_image_path):
-                return send_file(default_image_path, mimetype='image/png')
-            return jsonify({'error': 'PIL/Pillow가 설치되지 않았습니다.'}), 500
+        # 정적 이미지가 있으면 반환
+        if os.path.exists(og_image_path):
+            return send_file(og_image_path, mimetype='image/png')
         
-        try:
-            img = Image.new('RGB', (width, height), color='#f8f9fa')
-            draw = ImageDraw.Draw(img)
-            
-            # 배경 그라데이션 (부드러운 그라데이션)
-            for i in range(height):
-                # 위에서 아래로 밝은 회색에서 약간 더 밝은 회색으로
-                ratio = i / height
-                r = int(248 - ratio * 10)
-                g = int(249 - ratio * 15)
-                b = int(250 - ratio * 20)
-                draw.rectangle([(0, i), (width, i+1)], fill=(r, g, b))
-            
-            # 폰트 로드 시도 - Linux 환경에서 확실히 작동하는 폰트 우선
-            font_large = None
-            font_medium = None
-            font_small = None
-            
-            # Linux 환경에서 확실히 작동하는 폰트 우선 (영문 텍스트용)
-            # DejaVu Sans는 거의 모든 Linux 시스템에 설치되어 있음
-            linux_font_paths = [
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-            ]
-            
-            # 프로젝트 내 폰트 경로
-            project_font_dir = os.path.join(app.static_folder, 'fonts')
-            
-            # 다양한 플랫폼의 폰트 경로 시도
-            font_paths = linux_font_paths + [
-                # 프로젝트 내 폰트
-                os.path.join(project_font_dir, 'NotoSansKR-Bold.otf'),
-                os.path.join(project_font_dir, 'NotoSansKR-Regular.otf'),
-                os.path.join(project_font_dir, 'NanumGothic-Bold.ttf'),
-                os.path.join(project_font_dir, 'NanumGothic-Regular.ttf'),
-                # macOS
-                "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
-                "/System/Library/Fonts/AppleGothic.ttf",
-                "/Library/Fonts/AppleGothic.ttf",
-                # Linux 추가 폰트
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/truetype/nanum/NanumGothic-Bold.ttf",
-                "/usr/share/fonts/truetype/nanum/NanumGothic-Regular.ttf",
-                # Windows (일반적인 경로)
-                "C:/Windows/Fonts/arial.ttf",  # Arial (영문)
-                "C:/Windows/Fonts/arialbd.ttf",  # Arial Bold
-                "C:/Windows/Fonts/malgun.ttf",  # 맑은 고딕
-            ]
-            
-            for font_path in font_paths:
-                if os.path.exists(font_path):
-                    try:
-                        font_large = ImageFont.truetype(font_path, 180)
-                        font_medium = ImageFont.truetype(font_path, 50)
-                        font_small = ImageFont.truetype(font_path, 40)
-                        print(f"폰트 로드 성공: {font_path}")
-                        break
-                    except Exception as e:
-                        print(f"폰트 로드 실패 ({font_path}): {e}")
-                        continue
-            
-            # 폰트를 찾지 못한 경우 기본 폰트 사용
-            if not font_large:
-                try:
-                    # 기본 폰트는 영문만 지원하므로 안전함
-                    font_large = ImageFont.load_default()
-                    font_medium = ImageFont.load_default()
-                    font_small = ImageFont.load_default()
-                    print("기본 폰트 사용")
-                except Exception as e:
-                    print(f"기본 폰트 로드 실패: {e}")
-                    # 기본 폰트도 실패하면 None으로 설정
-                    font_large = None
-                    font_medium = None
-                    font_small = None
-            
-            # "Life Quotes" 텍스트 (매우 큰 글씨, 중앙, 강조)
-            text = "Life Quotes"
-            try:
-                if font_large:
-                    bbox = draw.textbbox((0, 0), text, font=font_large)
-                    text_width = bbox[2] - bbox[0]
-                    text_height = bbox[3] - bbox[1]
-                else:
-                    # 기본 폰트가 없으면 대략적인 크기 추정
-                    text_width = 400
-                    text_height = 150
-                x = (width - text_width) // 2
-                y = (height - text_height) // 2 - 100
-                
-                # 텍스트 그림자 효과
-                shadow_offset = 5
-                if font_large:
-                    draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
-                    # 메인 텍스트
-                    draw.text((x, y), text, fill='#1a202c', font=font_large)
-                else:
-                    # 폰트가 없으면 기본 폰트로 텍스트
-                    draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0')
-                    draw.text((x, y), text, fill='#1a202c')
-            except Exception as e:
-                print(f"메인 텍스트 렌더링 오류: {e}")
-                # 오류 발생 시 간단한 텍스트로 대체
-                draw.text((width // 2 - 200, height // 2 - 50), "Life Quotes", fill='#1a202c')
-            
-            # 부제목
-            subtitle = "A daily quote tailored to your birth date"
-            try:
-                if font_medium:
-                    bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
-                    text_width = bbox[2] - bbox[0]
-                    text_height = bbox[3] - bbox[1]
-                else:
-                    text_width = 600
-                    text_height = 50
-                x = (width - text_width) // 2
-                y = (height - text_height) // 2 + 120
-                if font_medium:
-                    draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
-                else:
-                    draw.text((x, y), subtitle, fill='#4a5568')
-            except Exception as e:
-                print(f"부제목 렌더링 오류: {e}")
-                draw.text((width // 2 - 300, height // 2 + 120), subtitle, fill='#4a5568')
-            
-            # 날짜 추가 (하단) - 영문 형식
-            today = get_kst_now().strftime('%B %d, %Y')  # 예: December 04, 2025
-            try:
-                if font_small:
-                    bbox = draw.textbbox((0, 0), today, font=font_small)
-                    text_width = bbox[2] - bbox[0]
-                else:
-                    text_width = 300
-                x = (width - text_width) // 2
-                y = height - 80
-                if font_small:
-                    draw.text((x, y), today, fill='#718096', font=font_small)
-                else:
-                    draw.text((x, y), today, fill='#718096')
-            except Exception as e:
-                print(f"날짜 렌더링 오류: {e}")
-                draw.text((width // 2 - 150, height - 80), today, fill='#718096')
-            
-            # 장식용 원 추가 (배경)
-            circle_size = 300
-            circle_x = width - 150
-            circle_y = 100
-            draw.ellipse([circle_x - circle_size//2, circle_y - circle_size//2,
-                         circle_x + circle_size//2, circle_y + circle_size//2],
-                        fill='#e2e8f0', outline=None)
-            
-            # 이미지를 바이트로 변환
-            img_io = BytesIO()
-            img.save(img_io, 'PNG', optimize=True)
-            img_io.seek(0)
-            
-            return send_file(img_io, mimetype='image/png')
-        except ImportError:
-            # PIL이 없는 경우 기본 이미지 반환
-            pass
-        except Exception as e:
-            print(f"이미지 생성 오류: {e}")
-            import traceback
-            traceback.print_exc()
-            pass
-        
-        # PIL이 없거나 오류 발생 시 기본 이미지 경로 반환
+        # 정적 이미지가 없으면 기본 이미지 반환
         default_image_path = os.path.join(app.static_folder, 'images', 'og_default.png')
         if os.path.exists(default_image_path):
             return send_file(default_image_path, mimetype='image/png')
         
-        # 기본 이미지도 없으면 404
+        # 이미지가 없으면 간단한 색상 이미지 생성
+        if HAS_PIL:
+            try:
+                img = Image.new('RGB', (1200, 630), color='#f8f9fa')
+                img_io = BytesIO()
+                img.save(img_io, 'PNG', optimize=True)
+                img_io.seek(0)
+                return send_file(img_io, mimetype='image/png')
+            except Exception as e:
+                print(f"이미지 생성 오류: {e}")
+        
         return jsonify({'error': 'OG 이미지를 생성할 수 없습니다.'}), 404
         
     except Exception as e:
-        print(f"OG 이미지 생성 오류: {e}")
+        print(f"OG 이미지 반환 오류: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
