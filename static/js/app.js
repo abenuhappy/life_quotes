@@ -317,6 +317,9 @@ async function loadDailyQuote() {
             if (data.data.flower) {
                 displayFlower(data.data.flower);
             }
+            if (data.data.greeting) {
+                displayGreeting(data.data.greeting);
+            }
             if (data.data.shopping_items && data.data.shopping_items.length > 0) {
                 displayShoppingItems(data.data.shopping_items);
             }
@@ -447,6 +450,32 @@ function displayColor(color) {
     
     // 화면 톤 변경
     applyColorTheme(color);
+}
+
+// 오늘의 인사말 표시
+function displayGreeting(greeting) {
+    const greetingCard = document.getElementById('greetingCard');
+    const greetingContent = document.getElementById('greetingContent');
+    
+    // 외국어인 경우 발음과 의미 표시
+    const pronunciationHTML = greeting.pronunciation 
+        ? `<p class="greeting-pronunciation">${greeting.pronunciation}</p>` 
+        : '';
+    const meaningHTML = greeting.meaning 
+        ? `<p class="greeting-meaning">${greeting.meaning}</p>` 
+        : '';
+    
+    greetingContent.innerHTML = `
+        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center">
+            <div class="greeting-category">${greeting.category || ''}</div>
+            <div class="greeting-text">${greeting.text || ''}</div>
+            <div class="greeting-language">${greeting.language || ''}</div>
+            ${pronunciationHTML}
+            ${meaningHTML}
+        </div>
+    `;
+    
+    greetingCard.style.display = 'block';
 }
 
 // 오늘의 꽃 표시

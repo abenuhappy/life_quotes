@@ -18,6 +18,7 @@ from color_suggester import ColorSuggester
 from drink_suggester import DrinkSuggester
 from shopping_suggester import ShoppingSuggester
 from flower_suggester import FlowerSuggester
+from greeting_suggester import GreetingSuggester
 
 # 한국시간대 설정
 KST = pytz.timezone('Asia/Seoul')
@@ -77,6 +78,7 @@ quote_fetcher = QuoteFetcher()
 color_suggester = ColorSuggester()
 drink_suggester = DrinkSuggester()
 flower_suggester = FlowerSuggester()
+greeting_suggester = GreetingSuggester()
 
 # 네이버 쇼핑 API 키 설정 (환경 변수 또는 직접 설정)
 NAVER_CLIENT_ID = os.environ.get('NAVER_CLIENT_ID', '6uQXc6h4TnSMVS_h5ooY')
@@ -320,6 +322,13 @@ def get_daily():
             print(f"꽃 추천 오류: {e}")
             flower = None
         
+        # 오늘의 인사말 추천
+        try:
+            greeting = greeting_suggester.suggest_greeting(birth_date)
+        except Exception as e:
+            print(f"인사말 추천 오류: {e}")
+            greeting = None
+        
         # 오늘의 쇼핑 아이템 추천
         try:
             shopping_items = shopping_suggester.suggest_shopping_items(birth_date, num_items=1)
@@ -337,6 +346,7 @@ def get_daily():
                 'color': color,
                 'drink': drink,
                 'flower': flower,
+                'greeting': greeting,
                 'shopping_items': shopping_items,
                 'date': get_kst_now().strftime('%Y-%m-%d')
             }

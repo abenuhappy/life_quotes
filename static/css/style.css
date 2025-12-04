@@ -1023,6 +1023,68 @@ section {
     color: #6b7280; /* text-gray-500 */
 }
 
+.greeting-card {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.greeting-card-title {
+    color: #374151; /* text-gray-700 */
+    margin-bottom: 12px; /* mb-3 */
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 4px; /* gap-1 */
+}
+
+.greeting-card .bg-white {
+    background: white;
+    border: 2px solid #f3f4f6; /* border-2 border-gray-100 */
+    border-radius: 16px; /* rounded-2xl */
+    padding: 24px; /* p-6 */
+    text-align: center;
+}
+
+.greeting-category {
+    font-size: var(--text-xs);
+    color: #9ca3af; /* text-gray-400 */
+    margin-bottom: 8px;
+    font-weight: var(--font-weight-normal);
+}
+
+.greeting-text {
+    font-size: var(--text-2xl);
+    color: #111827; /* text-gray-900 */
+    margin-bottom: 12px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+}
+
+.greeting-language {
+    font-size: var(--text-sm);
+    color: #6b7280; /* text-gray-500 */
+    margin-bottom: 8px;
+    font-weight: var(--font-weight-normal);
+}
+
+.greeting-pronunciation {
+    font-size: var(--text-sm);
+    color: #4b5563; /* text-gray-600 */
+    margin-bottom: 4px;
+    font-weight: var(--font-weight-normal);
+    font-style: italic;
+}
+
+.greeting-meaning {
+    font-size: var(--text-xs);
+    color: #6b7280; /* text-gray-500 */
+    margin-top: 8px;
+    font-weight: var(--font-weight-normal);
+}
+
 .shopping-card {
     background: transparent;
     padding: 0;
