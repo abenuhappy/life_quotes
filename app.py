@@ -473,12 +473,18 @@ def generate_og_image():
         
         # 정적 이미지가 있으면 반환
         if os.path.exists(og_image_path):
-            return send_file(og_image_path, mimetype='image/png')
+            response = send_file(og_image_path, mimetype='image/png')
+            # 카카오톡 크롤러를 위한 헤더 설정
+            response.headers['Cache-Control'] = 'public, max-age=3600'  # 1시간 캐시
+            response.headers['Content-Type'] = 'image/png'
+            return response
         
         # 정적 이미지가 없으면 기본 이미지 반환
         default_image_path = os.path.join(app.static_folder, 'images', 'og_default.png')
         if os.path.exists(default_image_path):
-            return send_file(default_image_path, mimetype='image/png')
+            response = send_file(default_image_path, mimetype='image/png')
+            response.headers['Cache-Control'] = 'public, max-age=3600'
+            return response
         
         # 이미지가 없으면 간단한 색상 이미지 생성
         if HAS_PIL:
@@ -487,7 +493,9 @@ def generate_og_image():
                 img_io = BytesIO()
                 img.save(img_io, 'PNG', optimize=True)
                 img_io.seek(0)
-                return send_file(img_io, mimetype='image/png')
+                response = send_file(img_io, mimetype='image/png')
+                response.headers['Cache-Control'] = 'public, max-age=3600'
+                return response
             except Exception as e:
                 print(f"이미지 생성 오류: {e}")
         
