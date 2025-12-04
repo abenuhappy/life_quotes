@@ -130,13 +130,12 @@ class ShoppingSuggester:
             num_items: 추천할 아이템 개수 (기본 1개)
         
         Returns:
-            쇼핑 아이템 리스트 (각 아이템은 name, category, search_url 포함)
+            쇼핑 아이템 리스트 (각 아이템은 name, category, link, image, price 포함)
         """
         if date_str is None:
             date_str = get_kst_now().strftime('%Y-%m-%d')
         
         # 날짜와 생년월일을 조합하여 시드 생성
-        # 날짜가 바뀌면 완전히 다른 시드가 생성되어 다른 추천이 나옴
         seed_str = f"{date_str}_{birth_date}_shopping"
         seed_hash = int(hashlib.md5(seed_str.encode()).hexdigest(), 16)
         
@@ -164,14 +163,12 @@ class ShoppingSuggester:
         random.seed(seed_hash)  # 시드 설정으로 동일한 날짜면 동일한 결과
         
         # 카테고리 선택 (시드 기반 - 날짜가 바뀌면 다른 카테고리)
-        # 시드의 다른 부분을 사용하여 카테고리 선택
         category_seed = seed_hash % (2**16)  # 하위 16비트 사용
         category_idx = category_seed % len(categories)
         category = categories[category_idx]
         
         # 해당 카테고리에서 아이템 선택 (날짜별로 다른 아이템)
         items = self.SHOPPING_ITEMS[category]
-        # 시드의 상위 비트를 사용하여 아이템 선택 (카테고리와 독립적으로)
         item_seed = (seed_hash >> 16) % (2**16)  # 상위 16비트 사용
         random.seed(item_seed)
         item_idx = random.randint(0, len(items) - 1)

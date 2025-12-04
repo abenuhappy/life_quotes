@@ -11,10 +11,36 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🌟 오늘, 나에게 들려주는 한 줄</h1>
-            <p class="subtitle" id="subtitle">생년월일에 맞춘 매일 다른 명언 또는 시를 제공합니다</p>
+        <header id="headerSection" style="display: none;">
+            <h1>오늘, 나에게 들려주는 한 줄</h1>
+            <p class="subtitle" id="subtitle">7일을 기록해 당신이 누구인지 들려드릴게요</p>
+            <div class="header-actions">
+                <button class="header-btn header-btn-friend" id="editBirthdayBtn" title="친구의 하루 보기">
+                    친구의 하루 보기
+                </button>
+                <div class="header-share-wrapper">
+                    <button class="header-btn header-btn-kakao" id="shareBtn" title="나의 하루 공유">
+                        나의 하루 공유
+                    </button>
+                    <!-- 공유 메뉴 (드롭다운) -->
+                    <div class="share-menu" id="shareMenu" style="display: none;">
+                        <button class="share-option" id="copyUrlBtn">
+                            <span class="share-icon">🔗</span>
+                            <span>URL 복사하기</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </header>
+
+        <!-- 네비게이션 메뉴 -->
+        <nav class="top-menu" id="topMenu" style="display: none;">
+            <button class="tab-item" data-target="quoteCard" data-tab="오늘의 한 줄">오늘의 한 줄</button>
+            <button class="tab-item" data-target="colorCard" data-tab="컬러">컬러</button>
+            <button class="tab-item" data-target="drinkCard" data-tab="차 한잔">차 한잔</button>
+            <button class="tab-item" data-target="flowerCard" data-tab="꽃">꽃</button>
+            <button class="tab-item" data-target="shoppingCard" data-tab="아이템">아이템</button>
+        </nav>
 
         <!-- 생년월일 입력 섹션 -->
         <section class="birthday-section" id="birthdaySection">
@@ -31,32 +57,45 @@
 
         <!-- 명언/시 표시 섹션 -->
         <section class="quote-section" id="quoteSection" style="display: none;">
-            <div class="quote-card">
-                <button class="btn-floating" id="refreshBtn" title="다른 한 줄 보기">
-                    <img src="{{ url_for('static', filename='images/refresh.png') }}" alt="새로고침" class="refresh-icon">
+            <div class="quote-card" id="quoteCard">
+                <button class="quote-btn quote-btn-heart" id="heartBtn" title="좋아요">
+                    <span class="quote-icon">❤️</span>
                 </button>
-                <div class="quote-header">
-                    <span class="quote-type" id="quoteType">명언</span>
-                </div>
+                <button class="quote-btn quote-btn-refresh" id="refreshBtn" title="다른 한 줄 보기">
+                    <span class="quote-icon">🔄</span>
+                </button>
                 <div class="quote-content" id="quoteContent">
-                    <p class="quote-text" id="quoteText"></p>
-                    <p class="quote-author" id="quoteAuthor"></p>
+                    <div class="quote-text-wrapper" id="quoteTextWrapper"></div>
+                    <div class="quote-author" id="quoteAuthor"></div>
                 </div>
-                <div class="quote-footer">
-                    <span class="quote-date" id="quoteDate"></span>
-                </div>
+                <div class="quote-date" id="quoteDate"></div>
             </div>
 
             <!-- 오늘의 컬러 -->
-            <div class="color-card" id="colorCard" style="display: none;">
-                <h3>오늘의 컬러</h3>
+            <div class="color-card" id="colorCard" style="display: none;" data-section="colorCard">
+                <h2 class="color-card-title">
+                    <span>🎨</span>
+                    <span>오늘의 컬러</span>
+                </h2>
                 <div class="color-content" id="colorContent"></div>
             </div>
 
             <!-- 오늘의 한잔 -->
-            <div class="drink-card" id="drinkCard" style="display: none;">
-                <h3>오늘의 한잔</h3>
+            <div class="drink-card" id="drinkCard" style="display: none;" data-section="drinkCard">
+                <h2 class="drink-card-title">
+                    <span>☕</span>
+                    <span>오늘의 한잔</span>
+                </h2>
                 <div class="drink-content" id="drinkContent"></div>
+            </div>
+
+            <!-- 오늘의 꽃 -->
+            <div class="flower-card" id="flowerCard" style="display: none;" data-section="flowerCard">
+                <h2 class="flower-card-title">
+                    <span>🌺</span>
+                    <span>오늘의 꽃</span>
+                </h2>
+                <div class="flower-content" id="flowerContent"></div>
             </div>
 
             <!-- 생년월일 분석 정보 -->
@@ -66,28 +105,14 @@
             </div>
 
             <!-- 추천 쇼핑 아이템 -->
-            <div class="shopping-card" id="shoppingCard" style="display: none;">
-                <h3>🛍️ 오늘의 추천 쇼핑</h3>
+            <div class="shopping-card" id="shoppingCard" style="display: none;" data-section="shoppingCard">
+                <h2 class="shopping-card-title">
+                    <span>🛍️</span>
+                    <span>오늘의 쇼핑</span>
+                </h2>
                 <div class="shopping-content" id="shoppingContent"></div>
             </div>
 
-            <!-- 플로팅 버튼들 -->
-            <div class="floating-buttons">
-                <button class="floating-btn floating-btn-edit" id="editBirthdayBtn" title="생년월일 변경하기">
-                    <span class="floating-btn-icon">✏️</span>
-                </button>
-                <button class="floating-btn floating-btn-share" id="shareBtn" title="공유하기">
-                    <span class="floating-btn-icon">🔗</span>
-                </button>
-            </div>
-            
-            <!-- 공유 메뉴 (드롭다운) -->
-            <div class="share-menu" id="shareMenu" style="display: none;">
-                <button class="share-option" id="copyUrlBtn">
-                    <span class="share-icon">🔗</span>
-                    <span>URL 복사하기</span>
-                </button>
-            </div>
         </section>
 
         <!-- 로딩 표시 -->

@@ -25,50 +25,6 @@ const loading = document.getElementById('loading');
 const errorMessage = document.getElementById('errorMessage');
 const birthdayMessage = document.getElementById('birthdayMessage');
 
-// 플로팅 버튼 위치 조정 (container 영역 내에서만)
-function adjustFloatingButtons() {
-    const container = document.querySelector('.container');
-    const floatingButtons = document.querySelector('.floating-buttons');
-    
-    if (!container || !floatingButtons) return;
-    
-    const containerRect = container.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const buttonHeight = 56 + 15 + 56; // 버튼 2개 + gap
-    const padding = 30;
-    
-    // container가 화면에 보이는 영역 계산
-    const containerTop = containerRect.top;
-    const containerBottom = containerRect.bottom;
-    const containerVisibleTop = Math.max(0, containerTop);
-    const containerVisibleBottom = Math.min(viewportHeight, containerBottom);
-    
-    // container가 화면에 보이지 않는 경우
-    if (containerBottom < 0 || containerTop > viewportHeight) {
-        // 버튼 숨기기
-        floatingButtons.style.opacity = '0';
-        floatingButtons.style.pointerEvents = 'none';
-        return;
-    }
-    
-    // 버튼 보이기
-    floatingButtons.style.opacity = '1';
-    floatingButtons.style.pointerEvents = 'auto';
-    
-    // container의 보이는 하단을 기준으로 버튼 위치 조정
-    const containerVisibleBottomFromViewport = viewportHeight - containerVisibleBottom;
-    const targetBottom = Math.max(padding, containerVisibleBottomFromViewport + padding);
-    
-    // 버튼이 container의 보이는 영역을 벗어나지 않도록 제한
-    const visibleContainerHeight = containerVisibleBottom - containerVisibleTop;
-    if (visibleContainerHeight < buttonHeight + padding * 2) {
-        // container가 너무 작으면 화면 하단에 고정
-        floatingButtons.style.bottom = `${padding}px`;
-    } else {
-        // container의 보이는 하단에 맞춤
-        floatingButtons.style.bottom = `${targetBottom}px`;
-    }
-}
 
 // 한국시간(KST) 기준 현재 시간 가져오기
 function getKSTNow() {
@@ -147,6 +103,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (saved) {
         birthdaySection.style.display = 'none';
         quoteSection.style.display = 'block';
+        // 헤더 및 메뉴 표시
+        const headerSection = document.getElementById('headerSection');
+        const topMenu = document.getElementById('topMenu');
+        if (headerSection) {
+            headerSection.style.display = 'block';
+        }
+        if (topMenu) {
+            topMenu.style.display = 'flex';
+        }
         updateSubtitle();
         loadDailyQuote();
     }
@@ -168,15 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 날짜 확인 인터벌 설정
     setupDateCheckInterval();
     
-    // 플로팅 버튼 위치 조정
-    adjustFloatingButtons();
-    
-    // 스크롤 및 리사이즈 시 버튼 위치 조정
-    window.addEventListener('scroll', adjustFloatingButtons);
-    window.addEventListener('resize', adjustFloatingButtons);
-    
-    // 컨텐츠 로드 후에도 위치 조정
-    setTimeout(adjustFloatingButtons, 100);
     
     // 페이지가 보일 때 포커스 이벤트로 날짜 확인 (탭 전환 시)
     document.addEventListener('visibilitychange', () => {
@@ -184,6 +140,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkDateAndUpdate();
         }
     });
+    
+    // 탭 메뉴 클릭 시 해당 섹션으로 스크롤 및 active 상태 관리
+    const tabItems = document.querySelectorAll('.tab-item');
+    let activeTab = '오늘의 한 줄'; // 기본 활성 탭
+    
+    tabItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const targetId = item.getAttribute('data-target');
+            const tabName = item.getAttribute('data-tab');
+            const targetElement = document.getElementById(targetId);
+            
+            // 모든 탭에서 active 클래스 제거
+            tabItems.forEach(tab => tab.classList.remove('active'));
+            // 클릭한 탭에 active 클래스 추가
+            item.classList.add('active');
+            activeTab = tabName;
+            
+            if (targetElement) {
+                // 요소가 표시되어 있는지 확인
+                if (targetElement.style.display === 'none') {
+                    // 요소가 숨겨져 있으면 표시
+                    targetElement.style.display = 'block';
+                }
+                
+                // 부드러운 스크롤
+                const offsetTop = targetElement.offsetTop;
+                const headerOffset = 100; // 헤더와 메뉴 높이 고려
+                const elementPosition = offsetTop - headerOffset;
+                
+                window.scrollTo({
+                    top: elementPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // 초기 활성 탭 설정
+    if (tabItems.length > 0) {
+        tabItems[0].classList.add('active');
+    }
 });
 
 // 생년월일 저장 확인
@@ -272,10 +271,17 @@ birthdayForm.addEventListener('submit', async (e) => {
                 birthdaySection.style.display = 'none';
                 quoteSection.style.display = 'block';
                 updateSubtitle(birthDate);
+                // 헤더 및 메뉴 표시
+                const headerSection = document.getElementById('headerSection');
+                const topMenu = document.getElementById('topMenu');
+                if (headerSection) {
+                    headerSection.style.display = 'block';
+                }
+                if (topMenu) {
+                    topMenu.style.display = 'flex';
+                }
                 // 생년월일 변경 시 즉시 새로운 명언 로드
                 loadDailyQuote();
-                // 플로팅 버튼 위치 조정
-                setTimeout(adjustFloatingButtons, 100);
             }, 500);
         } else {
             showMessage(birthdayMessage, data.error || '저장에 실패했습니다.', 'error');
@@ -296,7 +302,7 @@ async function loadDailyQuote() {
         const response = await fetch(`${API_BASE}/api/daily?user_id=${userId}`);
         const data = await response.json();
         
-        if (data.success) {
+            if (data.success) {
             displayQuote(data.data.quote);
             // 생년월일 분석 숨김 처리
             // if (data.data.analysis) {
@@ -308,8 +314,21 @@ async function loadDailyQuote() {
             if (data.data.drink) {
                 displayDrink(data.data.drink);
             }
+            if (data.data.flower) {
+                displayFlower(data.data.flower);
+            }
             if (data.data.shopping_items && data.data.shopping_items.length > 0) {
                 displayShoppingItems(data.data.shopping_items);
+            }
+            
+            // 헤더 및 메뉴 표시
+            const headerSection = document.getElementById('headerSection');
+            const topMenu = document.getElementById('topMenu');
+            if (headerSection) {
+                headerSection.style.display = 'block';
+            }
+            if (topMenu) {
+                topMenu.style.display = 'flex';
             }
             
             // 로드한 날짜 저장 (한국시간 기준)
@@ -367,17 +386,30 @@ async function loadRandomQuote() {
 
 // 명언 표시
 function displayQuote(quote) {
-    let typeText = '명언';
-    if (quote.type === 'poem') {
-        typeText = '시';
-    } else if (quote.type === 'drama') {
-        typeText = '명대사';
+    const quoteTextWrapper = document.getElementById('quoteTextWrapper');
+    const quoteAuthor = document.getElementById('quoteAuthor');
+    const quoteDate = document.getElementById('quoteDate');
+    
+    // 명언 텍스트를 줄바꿈으로 분리하여 각 줄을 별도의 p 태그로 표시
+    const quoteLines = quote.text.split('\n').filter(line => line.trim() !== '');
+    quoteTextWrapper.innerHTML = '';
+    
+    quoteLines.forEach(line => {
+        const p = document.createElement('p');
+        p.textContent = line.trim();
+        quoteTextWrapper.appendChild(p);
+    });
+    
+    // 작가 표시
+    if (quote.author) {
+        quoteAuthor.textContent = `- ${quote.author} -`;
+    } else {
+        quoteAuthor.textContent = '';
     }
     
-    document.getElementById('quoteType').textContent = typeText;
-    document.getElementById('quoteDate').textContent = quote.date || new Date().toLocaleDateString('ko-KR');
-    document.getElementById('quoteText').textContent = quote.text;
-    document.getElementById('quoteAuthor').textContent = `- ${quote.author}`;
+    // 날짜 표시 (우측 하단)
+    const today = getKSTToday();
+    quoteDate.textContent = today;
     
     // 공유용 데이터 저장
     currentQuote = quote;
@@ -388,18 +420,23 @@ function displayColor(color) {
     const colorCard = document.getElementById('colorCard');
     const colorContent = document.getElementById('colorContent');
     
+    // 의미 텍스트를 짧은 설명과 긴 설명으로 분리
+    const meaning = color.meaning || '';
+    // 첫 번째 문장을 짧은 설명으로, 나머지를 긴 설명으로
+    const sentences = meaning.split(/[.。]/).filter(s => s.trim() !== '');
+    let shortDesc = sentences.length > 0 ? sentences[0].trim() : meaning;
+    let longDesc = sentences.length > 1 ? sentences.slice(1).join('. ').trim() : '';
+    
+    // "입니다"로 끝나는 경우 처리
+    if (shortDesc && !shortDesc.endsWith('입니다') && !shortDesc.endsWith('.')) {
+        shortDesc += '입니다';
+    }
+    
     colorContent.innerHTML = `
-        <div class="color-preview" style="background-color: ${color.hex};">
-            <div class="color-info-wrapper">
-                <div class="color-info">
-                    <h4>${color.name}</h4>
-                    <p class="color-hex">${color.hex}</p>
-                    <p class="color-source">${color.source || ''}</p>
-                </div>
-                <div class="color-meaning">
-                    <p>${color.meaning || ''}</p>
-                </div>
-            </div>
+        <div class="color-inner-card">
+            <h3 class="color-name">${color.name}</h3>
+            <p class="color-short-desc">${shortDesc}</p>
+            ${longDesc ? `<p class="color-long-desc">${longDesc}</p>` : ''}
         </div>
     `;
     
@@ -412,7 +449,24 @@ function displayColor(color) {
     applyColorTheme(color);
 }
 
-// 추천 쇼핑 아이템 표시 (items[0]만 사용)
+// 오늘의 꽃 표시
+function displayFlower(flower) {
+    const flowerCard = document.getElementById('flowerCard');
+    const flowerContent = document.getElementById('flowerContent');
+    
+    flowerContent.innerHTML = `
+        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center">
+            <div class="text-6xl mb-3">${flower.emoji || '🌺'}</div>
+            <h3 class="text-gray-900 mb-1">${flower.name || ''}</h3>
+            <p class="text-xs text-gray-600 mb-3">${flower.source || ''}</p>
+            <p class="text-xs text-gray-500">${flower.meaning || ''}</p>
+        </div>
+    `;
+    
+    flowerCard.style.display = 'block';
+}
+
+// 추천 쇼핑 아이템 표시
 function displayShoppingItems(items) {
     const shoppingCard = document.getElementById('shoppingCard');
     const shoppingContent = document.getElementById('shoppingContent');
@@ -422,38 +476,39 @@ function displayShoppingItems(items) {
         return;
     }
     
-    // items[0]만 사용
+    // 첫 번째 아이템만 사용
     const item = items[0];
     
-    // 이미지가 있으면 이미지 포함 카드, 없으면 기본 카드
-    let itemHTML = '';
-    if (item.image) {
-        itemHTML = `
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shopping-item shopping-item-with-image">
-                <div class="shopping-item-image-wrapper">
-                    <img src="${item.image}" alt="${item.name}" class="shopping-item-image" onerror="this.style.display='none'">
-                </div>
-                <div class="shopping-item-info">
-                    <div class="shopping-item-category">${item.category || ''}</div>
-                    <div class="shopping-item-name">${item.name}</div>
-                    ${item.price ? `<div class="shopping-item-price">${parseInt(item.price).toLocaleString()}원</div>` : ''}
-                    ${item.mallName ? `<div class="shopping-item-mall">${item.mallName}</div>` : ''}
-                    <div class="shopping-item-link">네이버 쇼핑에서 보기 →</div>
-                </div>
-            </a>
-        `;
-    } else {
-        itemHTML = `
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shopping-item">
-                <div class="shopping-item-category">${item.category || ''}</div>
-                <div class="shopping-item-name">${item.name}</div>
-                ${item.price ? `<div class="shopping-item-price">${parseInt(item.price).toLocaleString()}원</div>` : ''}
-                <div class="shopping-item-link">네이버 쇼핑에서 보기 →</div>
-            </a>
-        `;
-    }
+    // 가격 정보 처리
+    const price = item.price ? parseInt(item.price) : null;
+    const formattedPrice = price ? `${price.toLocaleString()}원` : '';
     
-    shoppingContent.innerHTML = `<div class="shopping-items">${itemHTML}</div>`;
+    // 이미지가 있으면 이미지 사용, 없으면 기본 이모지
+    const imageHTML = item.image 
+        ? `<img src="${item.image}" alt="${item.name}" class="shopping-item-image" onerror="this.style.display='none'">`
+        : '<div class="text-3xl">🛍️</div>';
+    
+    shoppingContent.innerHTML = `
+        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6">
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shopping-item-link-wrapper">
+                <div class="flex gap-4 items-center">
+                    <div class="w-16 h-16 bg-gradient-to-b from-blue-100 to-blue-200 rounded-lg flex-shrink-0 flex items-center justify-center">
+                        ${imageHTML}
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-gray-900 text-sm mb-1">${item.name || ''}</h3>
+                        ${formattedPrice ? `
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-gray-900">${formattedPrice}</span>
+                            </div>
+                        ` : ''}
+                        ${item.mallName ? `<p class="text-xs text-gray-400">${item.mallName}</p>` : ''}
+                    </div>
+                </div>
+            </a>
+        </div>
+    `;
+    
     shoppingCard.style.display = 'block';
 }
 
@@ -462,17 +517,25 @@ function displayDrink(drink) {
     const drinkCard = document.getElementById('drinkCard');
     const drinkContent = document.getElementById('drinkContent');
     
+    // description을 문장 단위로 분리
+    const descriptionParts = drink.description ? drink.description.split(/[.!?]\s*/).filter(s => s.trim()) : [];
+    const shortDesc = descriptionParts.length > 0 ? descriptionParts[0] : '';
+    const longDesc = descriptionParts.length > 1 ? descriptionParts.slice(1).join('. ') : '';
+    
+    // 커피/차에 따른 아이콘 색상 결정
+    const iconColor = drink.type === 'coffee' ? 'bg-green-300' : 'bg-blue-300';
+    
     drinkContent.innerHTML = `
-        <div class="drink-preview">
-            <div class="drink-info">
-                <div class="drink-emoji">${drink.emoji}</div>
-                <h4>${drink.name}</h4>
-                <p class="drink-type">${drink.type_korean}</p>
-                <p class="drink-time">${drink.time_message}</p>
+        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center">
+            <div class="w-20 h-20 mx-auto mb-3 bg-gradient-to-br from-amber-800 to-amber-900 rounded-full flex items-center justify-center">
+                <div class="w-12 h-12 ${iconColor} rounded-full flex items-center justify-center">
+                    <span style="font-size: 1.5rem;">${drink.emoji || '☕'}</span>
+                </div>
             </div>
-            <div class="drink-description">
-                <p>${drink.description}</p>
-            </div>
+            <h3 class="text-gray-900 mb-1">${drink.name || ''}</h3>
+            <p class="text-xs text-gray-500 mb-1">${drink.type_korean || ''}</p>
+            ${shortDesc ? `<p class="text-xs text-gray-600">${shortDesc}</p>` : ''}
+            ${longDesc ? `<p class="text-xs text-gray-500 mt-3">${longDesc}</p>` : ''}
         </div>
     `;
     
@@ -957,4 +1020,5 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
 
