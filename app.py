@@ -548,15 +548,15 @@ def generate_og_image():
                     font_medium = None
                     font_small = None
             
-            # "오늘" 텍스트 (매우 큰 글씨, 중앙, 강조)
-            text = "오늘"
+            # "Life Quotes" 텍스트 (매우 큰 글씨, 중앙, 강조)
+            text = "Life Quotes"
             if font_large:
                 bbox = draw.textbbox((0, 0), text, font=font_large)
                 text_width = bbox[2] - bbox[0]
                 text_height = bbox[3] - bbox[1]
             else:
                 # 기본 폰트가 없으면 대략적인 크기 추정
-                text_width = 200
+                text_width = 400
                 text_height = 150
             x = (width - text_width) // 2
             y = (height - text_height) // 2 - 100
@@ -573,13 +573,13 @@ def generate_og_image():
                 draw.text((x, y), text, fill='#1a202c')
             
             # 부제목
-            subtitle = "나에게 들려주는 한 줄"
+            subtitle = "A daily quote tailored to your birth date"
             if font_medium:
                 bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
                 text_width = bbox[2] - bbox[0]
                 text_height = bbox[3] - bbox[1]
             else:
-                text_width = 400
+                text_width = 600
                 text_height = 50
             x = (width - text_width) // 2
             y = (height - text_height) // 2 + 120
@@ -588,8 +588,8 @@ def generate_og_image():
             else:
                 draw.text((x, y), subtitle, fill='#4a5568')
             
-            # 날짜 추가 (하단)
-            today = get_kst_now().strftime('%Y년 %m월 %d일')
+            # 날짜 추가 (하단) - 영문 형식
+            today = get_kst_now().strftime('%B %d, %Y')  # 예: December 04, 2025
             if font_small:
                 bbox = draw.textbbox((0, 0), today, font=font_small)
                 text_width = bbox[2] - bbox[0]
