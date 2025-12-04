@@ -497,11 +497,19 @@ def generate_og_image():
             font_medium = None
             font_small = None
             
-            # macOS 폰트 경로 시도
+            # 다양한 플랫폼의 폰트 경로 시도
             font_paths = [
+                # macOS
                 "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
                 "/System/Library/Fonts/AppleGothic.ttf",
                 "/Library/Fonts/AppleGothic.ttf",
+                # Linux (Render 환경)
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                # Windows (일반적인 경로)
+                "C:/Windows/Fonts/malgun.ttf",  # 맑은 고딕
+                "C:/Windows/Fonts/gulim.ttc",   # 굴림
             ]
             
             for font_path in font_paths:
@@ -511,45 +519,75 @@ def generate_og_image():
                         font_medium = ImageFont.truetype(font_path, 50)
                         font_small = ImageFont.truetype(font_path, 40)
                         break
-                    except:
+                    except Exception as e:
+                        print(f"폰트 로드 실패 ({font_path}): {e}")
                         continue
             
             # 폰트를 찾지 못한 경우 기본 폰트 사용
             if not font_large:
-                font_large = ImageFont.load_default()
-                font_medium = ImageFont.load_default()
-                font_small = ImageFont.load_default()
+                try:
+                    font_large = ImageFont.load_default()
+                    font_medium = ImageFont.load_default()
+                    font_small = ImageFont.load_default()
+                except:
+                    # 기본 폰트도 실패하면 None으로 설정
+                    font_large = None
+                    font_medium = None
+                    font_small = None
             
             # "오늘" 텍스트 (매우 큰 글씨, 중앙, 강조)
             text = "오늘"
-            bbox = draw.textbbox((0, 0), text, font=font_large)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
+            if font_large:
+                bbox = draw.textbbox((0, 0), text, font=font_large)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
+            else:
+                # 기본 폰트가 없으면 대략적인 크기 추정
+                text_width = 200
+                text_height = 150
             x = (width - text_width) // 2
             y = (height - text_height) // 2 - 100
             
             # 텍스트 그림자 효과
             shadow_offset = 5
-            draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
-            # 메인 텍스트
-            draw.text((x, y), text, fill='#1a202c', font=font_large)
+            if font_large:
+                draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
+                # 메인 텍스트
+                draw.text((x, y), text, fill='#1a202c', font=font_large)
+            else:
+                # 폰트가 없으면 간단한 텍스트
+                draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0')
+                draw.text((x, y), text, fill='#1a202c')
             
             # 부제목
             subtitle = "나에게 들려주는 한 줄"
-            bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
+            if font_medium:
+                bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
+            else:
+                text_width = 400
+                text_height = 50
             x = (width - text_width) // 2
             y = (height - text_height) // 2 + 120
-            draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
+            if font_medium:
+                draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
+            else:
+                draw.text((x, y), subtitle, fill='#4a5568')
             
             # 날짜 추가 (하단)
             today = get_kst_now().strftime('%Y년 %m월 %d일')
-            bbox = draw.textbbox((0, 0), today, font=font_small)
-            text_width = bbox[2] - bbox[0]
+            if font_small:
+                bbox = draw.textbbox((0, 0), today, font=font_small)
+                text_width = bbox[2] - bbox[0]
+            else:
+                text_width = 300
             x = (width - text_width) // 2
             y = height - 80
-            draw.text((x, y), today, fill='#718096', font=font_small)
+            if font_small:
+                draw.text((x, y), today, fill='#718096', font=font_small)
+            else:
+                draw.text((x, y), today, fill='#718096')
             
             # 장식용 원 추가 (배경)
             circle_size = 300
