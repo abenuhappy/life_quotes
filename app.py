@@ -492,27 +492,35 @@ def generate_og_image():
                 b = int(250 - ratio * 20)
                 draw.rectangle([(0, i), (width, i+1)], fill=(r, g, b))
             
-            # 폰트 로드 시도
+            # 폰트 로드 시도 - Linux 환경에서 확실히 작동하는 폰트 우선
             font_large = None
             font_medium = None
             font_small = None
             
-            # 프로젝트 내 폰트 경로 (최우선)
+            # Linux 환경에서 확실히 작동하는 폰트 우선 (영문 텍스트용)
+            # DejaVu Sans는 거의 모든 Linux 시스템에 설치되어 있음
+            linux_font_paths = [
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+            ]
+            
+            # 프로젝트 내 폰트 경로
             project_font_dir = os.path.join(app.static_folder, 'fonts')
             
             # 다양한 플랫폼의 폰트 경로 시도
-            font_paths = [
-                # 프로젝트 내 폰트 (최우선)
+            font_paths = linux_font_paths + [
+                # 프로젝트 내 폰트
                 os.path.join(project_font_dir, 'NotoSansKR-Bold.otf'),
                 os.path.join(project_font_dir, 'NotoSansKR-Regular.otf'),
                 os.path.join(project_font_dir, 'NanumGothic-Bold.ttf'),
                 os.path.join(project_font_dir, 'NanumGothic-Regular.ttf'),
-                os.path.join(project_font_dir, 'AppleGothic.ttf'),
                 # macOS
                 "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
                 "/System/Library/Fonts/AppleGothic.ttf",
                 "/Library/Fonts/AppleGothic.ttf",
-                # Linux (Render 환경) - Noto Sans CJK는 한글 지원
+                # Linux 추가 폰트
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                 "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
@@ -520,9 +528,9 @@ def generate_og_image():
                 "/usr/share/fonts/truetype/nanum/NanumGothic-Bold.ttf",
                 "/usr/share/fonts/truetype/nanum/NanumGothic-Regular.ttf",
                 # Windows (일반적인 경로)
+                "C:/Windows/Fonts/arial.ttf",  # Arial (영문)
+                "C:/Windows/Fonts/arialbd.ttf",  # Arial Bold
                 "C:/Windows/Fonts/malgun.ttf",  # 맑은 고딕
-                "C:/Windows/Fonts/malgunbd.ttf",  # 맑은 고딕 Bold
-                "C:/Windows/Fonts/gulim.ttc",   # 굴림
             ]
             
             for font_path in font_paths:
@@ -531,6 +539,7 @@ def generate_og_image():
                         font_large = ImageFont.truetype(font_path, 180)
                         font_medium = ImageFont.truetype(font_path, 50)
                         font_small = ImageFont.truetype(font_path, 40)
+                        print(f"폰트 로드 성공: {font_path}")
                         break
                     except Exception as e:
                         print(f"폰트 로드 실패 ({font_path}): {e}")
@@ -539,10 +548,13 @@ def generate_og_image():
             # 폰트를 찾지 못한 경우 기본 폰트 사용
             if not font_large:
                 try:
+                    # 기본 폰트는 영문만 지원하므로 안전함
                     font_large = ImageFont.load_default()
                     font_medium = ImageFont.load_default()
                     font_small = ImageFont.load_default()
-                except:
+                    print("기본 폰트 사용")
+                except Exception as e:
+                    print(f"기본 폰트 로드 실패: {e}")
                     # 기본 폰트도 실패하면 None으로 설정
                     font_large = None
                     font_medium = None
@@ -550,57 +562,70 @@ def generate_og_image():
             
             # "Life Quotes" 텍스트 (매우 큰 글씨, 중앙, 강조)
             text = "Life Quotes"
-            if font_large:
-                bbox = draw.textbbox((0, 0), text, font=font_large)
-                text_width = bbox[2] - bbox[0]
-                text_height = bbox[3] - bbox[1]
-            else:
-                # 기본 폰트가 없으면 대략적인 크기 추정
-                text_width = 400
-                text_height = 150
-            x = (width - text_width) // 2
-            y = (height - text_height) // 2 - 100
-            
-            # 텍스트 그림자 효과
-            shadow_offset = 5
-            if font_large:
-                draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
-                # 메인 텍스트
-                draw.text((x, y), text, fill='#1a202c', font=font_large)
-            else:
-                # 폰트가 없으면 간단한 텍스트
-                draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0')
-                draw.text((x, y), text, fill='#1a202c')
+            try:
+                if font_large:
+                    bbox = draw.textbbox((0, 0), text, font=font_large)
+                    text_width = bbox[2] - bbox[0]
+                    text_height = bbox[3] - bbox[1]
+                else:
+                    # 기본 폰트가 없으면 대략적인 크기 추정
+                    text_width = 400
+                    text_height = 150
+                x = (width - text_width) // 2
+                y = (height - text_height) // 2 - 100
+                
+                # 텍스트 그림자 효과
+                shadow_offset = 5
+                if font_large:
+                    draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
+                    # 메인 텍스트
+                    draw.text((x, y), text, fill='#1a202c', font=font_large)
+                else:
+                    # 폰트가 없으면 기본 폰트로 텍스트
+                    draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0')
+                    draw.text((x, y), text, fill='#1a202c')
+            except Exception as e:
+                print(f"메인 텍스트 렌더링 오류: {e}")
+                # 오류 발생 시 간단한 텍스트로 대체
+                draw.text((width // 2 - 200, height // 2 - 50), "Life Quotes", fill='#1a202c')
             
             # 부제목
             subtitle = "A daily quote tailored to your birth date"
-            if font_medium:
-                bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
-                text_width = bbox[2] - bbox[0]
-                text_height = bbox[3] - bbox[1]
-            else:
-                text_width = 600
-                text_height = 50
-            x = (width - text_width) // 2
-            y = (height - text_height) // 2 + 120
-            if font_medium:
-                draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
-            else:
-                draw.text((x, y), subtitle, fill='#4a5568')
+            try:
+                if font_medium:
+                    bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
+                    text_width = bbox[2] - bbox[0]
+                    text_height = bbox[3] - bbox[1]
+                else:
+                    text_width = 600
+                    text_height = 50
+                x = (width - text_width) // 2
+                y = (height - text_height) // 2 + 120
+                if font_medium:
+                    draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
+                else:
+                    draw.text((x, y), subtitle, fill='#4a5568')
+            except Exception as e:
+                print(f"부제목 렌더링 오류: {e}")
+                draw.text((width // 2 - 300, height // 2 + 120), subtitle, fill='#4a5568')
             
             # 날짜 추가 (하단) - 영문 형식
             today = get_kst_now().strftime('%B %d, %Y')  # 예: December 04, 2025
-            if font_small:
-                bbox = draw.textbbox((0, 0), today, font=font_small)
-                text_width = bbox[2] - bbox[0]
-            else:
-                text_width = 300
-            x = (width - text_width) // 2
-            y = height - 80
-            if font_small:
-                draw.text((x, y), today, fill='#718096', font=font_small)
-            else:
-                draw.text((x, y), today, fill='#718096')
+            try:
+                if font_small:
+                    bbox = draw.textbbox((0, 0), today, font=font_small)
+                    text_width = bbox[2] - bbox[0]
+                else:
+                    text_width = 300
+                x = (width - text_width) // 2
+                y = height - 80
+                if font_small:
+                    draw.text((x, y), today, fill='#718096', font=font_small)
+                else:
+                    draw.text((x, y), today, fill='#718096')
+            except Exception as e:
+                print(f"날짜 렌더링 오류: {e}")
+                draw.text((width // 2 - 150, height - 80), today, fill='#718096')
             
             # 장식용 원 추가 (배경)
             circle_size = 300
