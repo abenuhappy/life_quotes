@@ -3,8 +3,9 @@
 생년월일 기반 매일 명언/시 제공 시스템
 Flask Backend
 """
-from flask import Flask, request, jsonify, render_template, redirect
+from flask import Flask, request, jsonify, render_template, redirect, send_file
 from flask_cors import CORS
+from io import BytesIO
 import os
 import json
 import hashlib
@@ -12,6 +13,14 @@ import string
 import random
 from datetime import datetime
 import pytz
+
+# PIL/Pillow 임포트 (선택적)
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+    print("PIL/Pillow가 설치되지 않았습니다. OG 이미지 생성 기능이 제한됩니다.")
 from quote_fetcher import QuoteFetcher
 from birthday_analyzer import BirthdayAnalyzer
 from color_suggester import ColorSuggester
@@ -453,6 +462,131 @@ def redirect_short_url(short_code):
     except Exception as e:
         print(f"리다이렉트 오류: {e}")
         return redirect('/', code=302)
+
+
+@app.route('/og-image')
+def generate_og_image():
+    """오늘을 강조하는 OG 이미지 생성"""
+    try:
+        # 이미지 크기 (카카오톡 권장: 1200x630)
+        width, height = 1200, 630
+        
+        # PIL로 이미지 생성 시도
+        if not HAS_PIL:
+            # PIL이 없는 경우 기본 이미지 반환
+            default_image_path = os.path.join(app.static_folder, 'images', 'og_default.png')
+            if os.path.exists(default_image_path):
+                return send_file(default_image_path, mimetype='image/png')
+            return jsonify({'error': 'PIL/Pillow가 설치되지 않았습니다.'}), 500
+        
+        try:
+            img = Image.new('RGB', (width, height), color='#f8f9fa')
+            draw = ImageDraw.Draw(img)
+            
+            # 배경 그라데이션 (부드러운 그라데이션)
+            for i in range(height):
+                # 위에서 아래로 밝은 회색에서 약간 더 밝은 회색으로
+                ratio = i / height
+                r = int(248 - ratio * 10)
+                g = int(249 - ratio * 15)
+                b = int(250 - ratio * 20)
+                draw.rectangle([(0, i), (width, i+1)], fill=(r, g, b))
+            
+            # 폰트 로드 시도
+            font_large = None
+            font_medium = None
+            font_small = None
+            
+            # macOS 폰트 경로 시도
+            font_paths = [
+                "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
+                "/System/Library/Fonts/AppleGothic.ttf",
+                "/Library/Fonts/AppleGothic.ttf",
+            ]
+            
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    try:
+                        font_large = ImageFont.truetype(font_path, 180)
+                        font_medium = ImageFont.truetype(font_path, 50)
+                        font_small = ImageFont.truetype(font_path, 40)
+                        break
+                    except:
+                        continue
+            
+            # 폰트를 찾지 못한 경우 기본 폰트 사용
+            if not font_large:
+                font_large = ImageFont.load_default()
+                font_medium = ImageFont.load_default()
+                font_small = ImageFont.load_default()
+            
+            # "오늘" 텍스트 (매우 큰 글씨, 중앙, 강조)
+            text = "오늘"
+            bbox = draw.textbbox((0, 0), text, font=font_large)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = (width - text_width) // 2
+            y = (height - text_height) // 2 - 100
+            
+            # 텍스트 그림자 효과
+            shadow_offset = 5
+            draw.text((x + shadow_offset, y + shadow_offset), text, fill='#e2e8f0', font=font_large)
+            # 메인 텍스트
+            draw.text((x, y), text, fill='#1a202c', font=font_large)
+            
+            # 부제목
+            subtitle = "나에게 들려주는 한 줄"
+            bbox = draw.textbbox((0, 0), subtitle, font=font_medium)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = (width - text_width) // 2
+            y = (height - text_height) // 2 + 120
+            draw.text((x, y), subtitle, fill='#4a5568', font=font_medium)
+            
+            # 날짜 추가 (하단)
+            today = get_kst_now().strftime('%Y년 %m월 %d일')
+            bbox = draw.textbbox((0, 0), today, font=font_small)
+            text_width = bbox[2] - bbox[0]
+            x = (width - text_width) // 2
+            y = height - 80
+            draw.text((x, y), today, fill='#718096', font=font_small)
+            
+            # 장식용 원 추가 (배경)
+            circle_size = 300
+            circle_x = width - 150
+            circle_y = 100
+            draw.ellipse([circle_x - circle_size//2, circle_y - circle_size//2,
+                         circle_x + circle_size//2, circle_y + circle_size//2],
+                        fill='#e2e8f0', outline=None)
+            
+            # 이미지를 바이트로 변환
+            img_io = BytesIO()
+            img.save(img_io, 'PNG', optimize=True)
+            img_io.seek(0)
+            
+            return send_file(img_io, mimetype='image/png')
+        except ImportError:
+            # PIL이 없는 경우 기본 이미지 반환
+            pass
+        except Exception as e:
+            print(f"이미지 생성 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            pass
+        
+        # PIL이 없거나 오류 발생 시 기본 이미지 경로 반환
+        default_image_path = os.path.join(app.static_folder, 'images', 'og_default.png')
+        if os.path.exists(default_image_path):
+            return send_file(default_image_path, mimetype='image/png')
+        
+        # 기본 이미지도 없으면 404
+        return jsonify({'error': 'OG 이미지를 생성할 수 없습니다.'}), 404
+        
+    except Exception as e:
+        print(f"OG 이미지 생성 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

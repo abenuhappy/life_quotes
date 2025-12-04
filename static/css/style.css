@@ -658,7 +658,7 @@ section {
 }
 
 .quote-card {
-    background: linear-gradient(to bottom right, #b8984a, #a08840);
+    background: linear-gradient(to bottom right, #b8984a, #a08840); /* 기본값, JavaScript에서 동적으로 변경 */
     color: white;
     padding: 32px;
     border-radius: 16px;
@@ -667,6 +667,7 @@ section {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
     position: relative;
     min-height: 300px;
+    transition: background 0.5s ease, color 0.5s ease;
 }
 
 .quote-btn {
@@ -765,16 +766,19 @@ section {
 }
 
 .color-content {
-    background: linear-gradient(to bottom right, #fde047, #facc15);
+    background: linear-gradient(to bottom right, #fde047, #facc15); /* 기본값, JavaScript에서 동적으로 변경 */
     border-radius: 16px;
     padding: 24px;
     text-align: center;
+    transition: background 0.5s ease;
 }
 
 .color-inner-card {
     background: white;
     border-radius: 12px;
     padding: 24px;
+    border: 2px solid transparent; /* 기본값은 투명, JavaScript에서 동적으로 변경 */
+    transition: border-color 0.3s ease;
 }
 
 .color-name {

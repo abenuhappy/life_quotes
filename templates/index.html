@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>생년월일 기반 매일 명언/시</title>
+    <title>오늘, 나에게 들려주는 한 줄</title>
+    
+    <!-- Open Graph 메타 태그 (카카오톡 공유용) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="오늘, 나에게 들려주는 한 줄">
+    <meta property="og:description" content="생년월일에 맞춘 매일 다른 명언과 시를 제공합니다. 오늘의 컬러, 한잔, 꽃, 인사말까지 확인해보세요.">
+    <meta property="og:image" content="{{ request.url_root }}og-image">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:site_name" content="오늘, 나에게 들려주는 한 줄">
+    
+    <!-- 카카오톡 전용 메타 태그 -->
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">

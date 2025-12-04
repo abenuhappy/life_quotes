@@ -450,6 +450,12 @@ function displayColor(color) {
     
     // 화면 톤 변경
     applyColorTheme(color);
+    
+    // quote card 배경색 변경
+    applyQuoteCardColor(color);
+    
+    // color card 테두리 색상 변경
+    applyColorCardBorder(color);
 }
 
 // 오늘의 인사말 표시
@@ -572,6 +578,58 @@ function displayDrink(drink) {
     
     // 공유용 데이터 저장
     currentDrink = drink;
+}
+
+// quote card 배경색 변경
+function applyQuoteCardColor(color) {
+    const quoteCard = document.getElementById('quoteCard');
+    if (!quoteCard) return;
+    
+    const hex = color.hex;
+    const rgb = color.rgb || hexToRgb(hex);
+    
+    if (!rgb) return;
+    
+    // 컬러의 밝기 계산
+    const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+    const isLight = brightness > 128;
+    
+    // quote card 배경 그라데이션 생성
+    // 원본 컬러와 약간 어두운 버전을 조합
+    const gradientColor1 = hex;
+    const gradientColor2 = adjustBrightness(hex, -0.2); // 20% 어둡게
+    
+    quoteCard.style.background = `linear-gradient(to bottom right, ${gradientColor1}, ${gradientColor2})`;
+    
+    // 텍스트 색상 조정 (밝은 배경이면 어두운 텍스트, 어두운 배경이면 밝은 텍스트)
+    if (isLight) {
+        quoteCard.style.color = '#1a1a1a'; // 어두운 텍스트
+    } else {
+        quoteCard.style.color = '#ffffff'; // 밝은 텍스트
+    }
+}
+
+// color card 테두리 색상 변경
+function applyColorCardBorder(color) {
+    const colorContent = document.getElementById('colorContent');
+    if (!colorContent) return;
+    
+    const hex = color.hex;
+    const rgb = color.rgb || hexToRgb(hex);
+    
+    if (!rgb) return;
+    
+    // color card 배경 그라데이션 변경 (colorContent 자체가 .color-content div)
+    const gradientColor1 = adjustBrightness(hex, 0.3); // 30% 밝게
+    const gradientColor2 = adjustBrightness(hex, 0.1); // 10% 밝게
+    
+    colorContent.style.background = `linear-gradient(to bottom right, ${gradientColor1}, ${gradientColor2})`;
+    
+    // inner card 테두리 색상 변경
+    const innerCard = colorContent.querySelector('.color-inner-card');
+    if (innerCard) {
+        innerCard.style.border = `2px solid ${hex}`;
+    }
 }
 
 // 컬러에 맞춰 화면 톤 변경
