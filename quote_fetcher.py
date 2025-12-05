@@ -1426,7 +1426,319 @@ class QuoteFetcher:
                 },
             ]
             
-            return random.choice(korean_drama_quotes)
+            # 해외 영화 명대사 추가
+            international_movie_quotes = [
+                {
+                    'text': 'May the Force be with you.',
+                    'original': 'May the Force be with you.',
+                    'pronunciation': '메이 더 포스 비 위드 유',
+                    'translation': '포스가 함께하기를.',
+                    'author': '스타워즈',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Life is like a box of chocolates. You never know what you\'re gonna get.',
+                    'original': 'Life is like a box of chocolates. You never know what you\'re gonna get.',
+                    'pronunciation': '라이프 이즈 라이크 어 박스 오브 초콜릿츠. 유 네버 노우 왓 유어 건너 겟.',
+                    'translation': '인생은 초콜릿 상자와 같다. 무엇이 나올지 절대 모른다.',
+                    'author': '포레스트 검프',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'To infinity and beyond!',
+                    'original': 'To infinity and beyond!',
+                    'pronunciation': '투 인피니티 앤 비욘드!',
+                    'translation': '무한대로, 그리고 그 너머로!',
+                    'author': '토이 스토리',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'ll be back.',
+                    'original': 'I\'ll be back.',
+                    'pronunciation': '아일 비 백.',
+                    'translation': '다시 돌아오겠다.',
+                    'author': '터미네이터',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You can\'t handle the truth!',
+                    'original': 'You can\'t handle the truth!',
+                    'pronunciation': '유 캔트 핸들 더 트루스!',
+                    'translation': '당신은 진실을 견딜 수 없어!',
+                    'author': '몇몇 좋은 사람들',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Carpe diem. Seize the day, boys. Make your lives extraordinary.',
+                    'original': 'Carpe diem. Seize the day, boys. Make your lives extraordinary.',
+                    'pronunciation': '카르페 디엠. 시즈 더 데이, 보이즈. 메이크 유어 라이브스 익스트로디너리.',
+                    'translation': '오늘을 잡아라. 오늘을 붙잡아라, 소년들이여. 너의 인생을 비범하게 만들어라.',
+                    'author': '죽은 시인의 사회',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'There\'s no place like home.',
+                    'original': 'There\'s no place like home.',
+                    'pronunciation': '데어즈 노 플레이스 라이크 홈.',
+                    'translation': '집만한 곳이 없어.',
+                    'author': '오즈의 마법사',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'m the king of the world!',
+                    'original': 'I\'m the king of the world!',
+                    'pronunciation': '아임 더 킹 오브 더 월드!',
+                    'translation': '나는 세계의 왕이다!',
+                    'author': '타이타닉',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Houston, we have a problem.',
+                    'original': 'Houston, we have a problem.',
+                    'pronunciation': '휴스턴, 위 헤브 어 프라블럼.',
+                    'translation': '휴스턴, 문제가 발생했습니다.',
+                    'author': '아폴로 13',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Here\'s looking at you, kid.',
+                    'original': 'Here\'s looking at you, kid.',
+                    'pronunciation': '히어즈 루킹 앳 유, 키드.',
+                    'translation': '건배, 꼬마야.',
+                    'author': '카사블랑카',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You\'re gonna need a bigger boat.',
+                    'original': 'You\'re gonna need a bigger boat.',
+                    'pronunciation': '유어 건너 니드 어 비거 보트.',
+                    'translation': '더 큰 배가 필요할 거야.',
+                    'author': '죠스',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Keep your friends close, but your enemies closer.',
+                    'original': 'Keep your friends close, but your enemies closer.',
+                    'pronunciation': '킵 유어 프렌즈 클로즈, 벗 유어 에너미즈 클로저.',
+                    'translation': '친구는 가까이 두되, 적은 더 가까이 두어라.',
+                    'author': '대부 2',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I see dead people.',
+                    'original': 'I see dead people.',
+                    'pronunciation': '아이 시 데드 피플.',
+                    'translation': '죽은 사람들이 보여요.',
+                    'author': '식스 센스',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Why so serious?',
+                    'original': 'Why so serious?',
+                    'pronunciation': '와이 소 시리어스?',
+                    'translation': '왜 그렇게 심각해?',
+                    'author': '다크 나이트',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I am Iron Man.',
+                    'original': 'I am Iron Man.',
+                    'pronunciation': '아이 앰 아이언 맨.',
+                    'translation': '나는 아이언맨이다.',
+                    'author': '아이언맨',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'With great power comes great responsibility.',
+                    'original': 'With great power comes great responsibility.',
+                    'pronunciation': '위드 그레이트 파워 컴즈 그레이트 리스폰시빌리티.',
+                    'translation': '큰 힘에는 큰 책임이 따른다.',
+                    'author': '스파이더맨',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'m going to make him an offer he can\'t refuse.',
+                    'original': 'I\'m going to make him an offer he can\'t refuse.',
+                    'pronunciation': '아임 고잉 투 메이크 힘 언 오퍼 히 캔트 리퓨즈.',
+                    'translation': '그가 거절할 수 없는 제안을 하겠다.',
+                    'author': '대부',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You talking to me?',
+                    'original': 'You talking to me?',
+                    'pronunciation': '유 토킹 투 미?',
+                    'translation': '나한테 말하는 거야?',
+                    'author': '택시 드라이버',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'ll have what she\'s having.',
+                    'original': 'I\'ll have what she\'s having.',
+                    'pronunciation': '아일 헤브 왓 시즈 해빙.',
+                    'translation': '그녀가 먹는 것과 같은 걸 주세요.',
+                    'author': '해리가 샐리를 만났을 때',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'There\'s no crying in baseball!',
+                    'original': 'There\'s no crying in baseball!',
+                    'pronunciation': '데어즈 노 크라이잉 인 베이스볼!',
+                    'translation': '야구에는 울음이 없다!',
+                    'author': '어 페어 투 리멤버',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You had me at hello.',
+                    'original': 'You had me at hello.',
+                    'pronunciation': '유 해드 미 앳 헬로.',
+                    'translation': '안녕이라고 말한 순간부터 난 네 편이었어.',
+                    'author': '제리 맥과이어',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Show me the money!',
+                    'original': 'Show me the money!',
+                    'pronunciation': '쇼 미 더 머니!',
+                    'translation': '돈을 보여줘!',
+                    'author': '제리 맥과이어',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'m just a girl, standing in front of a boy, asking him to love her.',
+                    'original': 'I\'m just a girl, standing in front of a boy, asking him to love her.',
+                    'pronunciation': '아임 저스트 어 걸, 스탠딩 인 프론트 오브 어 보이, 애스킹 힘 투 러브 허.',
+                    'translation': '나는 단지 한 소녀일 뿐이야, 한 소년 앞에 서서 그에게 자신을 사랑해달라고 부탁하는.',
+                    'author': '노팅힐',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You complete me.',
+                    'original': 'You complete me.',
+                    'pronunciation': '유 컴플리트 미.',
+                    'translation': '너는 나를 완성시켜.',
+                    'author': '제리 맥과이어',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'m the one who knocks!',
+                    'original': 'I\'m the one who knocks!',
+                    'pronunciation': '아임 더 원 후 녹스!',
+                    'translation': '문을 두드리는 건 바로 나다!',
+                    'author': '브레이킹 배드',
+                    'source': '드라마',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Winter is coming.',
+                    'original': 'Winter is coming.',
+                    'pronunciation': '윈터 이즈 커밍.',
+                    'translation': '겨울이 다가온다.',
+                    'author': '왕좌의 게임',
+                    'source': '드라마',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Not all those who wander are lost.',
+                    'original': 'Not all those who wander are lost.',
+                    'pronunciation': '낫 올 도즈 후 원더 아 로스트.',
+                    'translation': '떠도는 모든 이가 길을 잃은 것은 아니다.',
+                    'author': '반지의 제왕',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'You shall not pass!',
+                    'original': 'You shall not pass!',
+                    'pronunciation': '유 샬 낫 패스!',
+                    'translation': '넘어서는 안 된다!',
+                    'author': '반지의 제왕',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'One does not simply walk into Mordor.',
+                    'original': 'One does not simply walk into Mordor.',
+                    'pronunciation': '원 더즈 낫 심플리 워크 인투 모르도르.',
+                    'translation': '모르도르로는 그냥 걸어 들어갈 수 없다.',
+                    'author': '반지의 제왕',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I am your father.',
+                    'original': 'I am your father.',
+                    'pronunciation': '아이 앰 유어 파더.',
+                    'translation': '나는 네 아버지다.',
+                    'author': '스타워즈: 제국의 역습',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Do or do not. There is no try.',
+                    'original': 'Do or do not. There is no try.',
+                    'pronunciation': '두 오어 두 낫. 데어 이즈 노 트라이.',
+                    'translation': '하거나 하지 않거나. 시도는 없다.',
+                    'author': '스타워즈: 제국의 역습',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'ll be back.',
+                    'original': 'I\'ll be back.',
+                    'pronunciation': '아일 비 백.',
+                    'translation': '다시 돌아오겠다.',
+                    'author': '터미네이터 2',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'Hasta la vista, baby.',
+                    'original': 'Hasta la vista, baby.',
+                    'pronunciation': '아스타 라 비스타, 베이비.',
+                    'translation': '나중에 봐, 베이비.',
+                    'author': '터미네이터 2',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+                {
+                    'text': 'I\'m back.',
+                    'original': 'I\'m back.',
+                    'pronunciation': '아임 백.',
+                    'translation': '돌아왔다.',
+                    'author': '터미네이터 2',
+                    'source': '영화',
+                    'type': 'drama'
+                },
+            ]
+            
+            # 한국 드라마/영화와 해외 영화를 합쳐서 랜덤 선택
+            all_quotes = korean_drama_quotes + international_movie_quotes
+            return random.choice(all_quotes)
         except Exception as e:
             print(f"한국 드라마/영화 명대사 수집 오류: {e}")
         return None

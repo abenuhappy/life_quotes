@@ -43,6 +43,18 @@ function getMillisecondsUntilMidnight() {
     return midnight.getTime() - now.getTime();
 }
 
+// 텍스트를 해시하여 고유 ID 생성
+function getContentHash(text) {
+    let hash = 0;
+    if (text.length === 0) return hash.toString(16);
+    for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 32bit 정수로 변환
+    }
+    return Math.abs(hash).toString(16).substring(0, 16);
+}
+
 // 자정 자동 새로고침 설정
 function setupMidnightAutoRefresh() {
     // 기존 타이머가 있으면 제거
@@ -443,15 +455,33 @@ function displayQuote(quote) {
     const quoteAuthor = document.getElementById('quoteAuthor');
     const quoteDate = document.getElementById('quoteDate');
     
-    // 명언 텍스트를 줄바꿈으로 분리하여 각 줄을 별도의 p 태그로 표시
-    const quoteLines = quote.text.split('\n').filter(line => line.trim() !== '');
     quoteTextWrapper.innerHTML = '';
     
-    quoteLines.forEach(line => {
-        const p = document.createElement('p');
-        p.textContent = line.trim();
-        quoteTextWrapper.appendChild(p);
-    });
+    // 외국어 명대사인 경우 (original, translation이 있는 경우)
+    if (quote.original && quote.translation) {
+        // 원문 표시
+        const originalP = document.createElement('p');
+        originalP.textContent = quote.original;
+        originalP.style.fontStyle = 'italic';
+        originalP.style.fontSize = '1.1em';
+        originalP.style.marginBottom = '12px';
+        quoteTextWrapper.appendChild(originalP);
+        
+        // 해석 표시
+        const translationP = document.createElement('p');
+        translationP.textContent = quote.translation;
+        translationP.style.fontSize = '1em';
+        translationP.style.marginTop = '8px';
+        quoteTextWrapper.appendChild(translationP);
+    } else {
+        // 일반 명언/시인 경우 (기존 로직)
+        const quoteLines = quote.text.split('\n').filter(line => line.trim() !== '');
+        quoteLines.forEach(line => {
+            const p = document.createElement('p');
+            p.textContent = line.trim();
+            quoteTextWrapper.appendChild(p);
+        });
+    }
     
     // 작가 표시
     if (quote.author) {
@@ -486,10 +516,10 @@ function displayColor(color) {
     }
     
     colorContent.innerHTML = `
-        <div class="color-inner-card">
-            <h3 class="color-name">${color.name}</h3>
-            <p class="color-short-desc">${shortDesc}</p>
-            ${longDesc ? `<p class="color-long-desc">${longDesc}</p>` : ''}
+        <div class="color-card-wrapper rounded-2xl p-6 text-center" style="background: white; border: 3px solid ${color.hex};">
+            <h3 class="text-gray-900 mb-3" style="color: ${color.hex}; font-weight: 700;">${color.name}</h3>
+            <p class="text-sm text-gray-600 mb-2">${shortDesc}</p>
+            ${longDesc ? `<p class="text-sm text-gray-700">${longDesc}</p>` : ''}
         </div>
     `;
     
@@ -521,11 +551,16 @@ function displayGreeting(greeting) {
         ? `<p class="greeting-meaning">${greeting.meaning}</p>` 
         : '';
     
+    // greeting.text를 <br> 태그로 변환
+    const greetingText = (greeting.text || '').replace(/\n/g, '<br />');
+    
     greetingContent.innerHTML = `
         <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center">
-            <div class="greeting-category">${greeting.category || ''}</div>
-            <div class="greeting-text">${greeting.text || ''}</div>
-            <div class="greeting-language">${greeting.language || ''}</div>
+            <p class="text-gray-700 text-base leading-relaxed font-medium">
+                ${greetingText || ''}
+            </p>
+            ${greeting.category ? `<div class="greeting-category">${greeting.category}</div>` : ''}
+            ${greeting.language ? `<div class="greeting-language">${greeting.language}</div>` : ''}
             ${pronunciationHTML}
             ${meaningHTML}
         </div>
@@ -669,16 +704,16 @@ function applyColorCardBorder(color) {
     
     if (!rgb) return;
     
-    // color card 배경 그라데이션 변경 (colorContent 자체가 .color-content div)
-    const gradientColor1 = adjustBrightness(hex, 0.3); // 30% 밝게
-    const gradientColor2 = adjustBrightness(hex, 0.1); // 10% 밝게
-    
-    colorContent.style.background = `linear-gradient(to bottom right, ${gradientColor1}, ${gradientColor2})`;
-    
-    // inner card 테두리 색상 변경
-    const innerCard = colorContent.querySelector('.color-inner-card');
-    if (innerCard) {
-        innerCard.style.border = `2px solid ${hex}`;
+    // color card wrapper의 테두리 색상 업데이트
+    const colorCardWrapper = colorContent.querySelector('.color-card-wrapper');
+    if (colorCardWrapper) {
+        colorCardWrapper.style.borderColor = hex;
+        
+        // 색상 타이틀도 업데이트
+        const colorTitle = colorCardWrapper.querySelector('h3');
+        if (colorTitle) {
+            colorTitle.style.color = hex;
+        }
     }
 }
 

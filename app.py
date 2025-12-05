@@ -28,6 +28,7 @@ from drink_suggester import DrinkSuggester
 from shopping_suggester import ShoppingSuggester
 from flower_suggester import FlowerSuggester
 from greeting_suggester import GreetingSuggester
+from user_history_service import UserHistoryService
 
 # 한국시간대 설정
 KST = pytz.timezone('Asia/Seoul')
@@ -88,6 +89,9 @@ color_suggester = ColorSuggester()
 drink_suggester = DrinkSuggester()
 flower_suggester = FlowerSuggester()
 greeting_suggester = GreetingSuggester()
+
+# 히스토리 서비스 초기화
+history_service = UserHistoryService(data_folder=DATA_FOLDER)
 
 # 네이버 쇼핑 API 키 설정 (환경 변수 또는 직접 설정)
 NAVER_CLIENT_ID = os.environ.get('NAVER_CLIENT_ID', '6uQXc6h4TnSMVS_h5ooY')
@@ -298,9 +302,30 @@ def get_daily():
             print(f"생년월일 분석 오류: {e}")
             analysis = None
         
-        # 오늘의 명언/시 (생년월일 포함)
+        # 오늘의 명언/시 (생년월일 포함, 중복 회피)
         try:
-            quote = quote_fetcher.fetch_daily_quote(birth_date=birth_date)
+            quote = None
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                # 날짜 기반 명언 가져오기 (시드에 시도 횟수 추가하여 변화 주기)
+                random_seed = f"{get_kst_now().strftime('%Y-%m-%d')}_{attempt}"
+                temp_quote = quote_fetcher.fetch_random_quote(birth_date=birth_date, random_seed=random_seed)
+                
+                # 명언 ID 생성 (텍스트 해시)
+                quote_id = history_service.get_content_hash(temp_quote.get('text', ''))
+                
+                # 중복 회피 확인
+                if not history_service.should_avoid(user_id, 'quote', quote_id):
+                    quote = temp_quote
+                    # 히스토리에 기록
+                    history_service.record_view(user_id, 'quote', quote_id)
+                    break
+            
+            # 모든 시도 실패 시 마지막 명언 사용
+            if quote is None:
+                quote = quote_fetcher.fetch_daily_quote(birth_date=birth_date)
+                quote_id = history_service.get_content_hash(quote.get('text', ''))
+                history_service.record_view(user_id, 'quote', quote_id)
         except Exception as e:
             print(f"명언 가져오기 오류: {e}")
             import traceback
@@ -310,37 +335,120 @@ def get_daily():
                 'error': f'명언을 가져오는 중 오류가 발생했습니다: {str(e)}'
             }), 500
         
-        # 오늘의 컬러 추천
+        # 오늘의 컬러 추천 (중복 회피)
         try:
-            color = color_suggester.suggest_color(birth_date)
+            color = None
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                # 날짜 기반 컬러 가져오기
+                date_str = get_kst_now().strftime('%Y-%m-%d')
+                # 시도 횟수를 시드에 추가
+                temp_color = color_suggester.suggest_color(birth_date, date_str=f"{date_str}_{attempt}")
+                color_name = temp_color.get('name', '')
+                
+                # 중복 회피 확인
+                if not history_service.should_avoid(user_id, 'color', color_name):
+                    color = temp_color
+                    history_service.record_view(user_id, 'color', color_name)
+                    break
+            
+            # 모든 시도 실패 시 마지막 컬러 사용
+            if color is None:
+                color = color_suggester.suggest_color(birth_date)
+                color_name = color.get('name', '')
+                history_service.record_view(user_id, 'color', color_name)
         except Exception as e:
             print(f"컬러 추천 오류: {e}")
             color = None
         
-        # 오늘의 한잔 추천
+        # 오늘의 한잔 추천 (중복 회피)
         try:
-            drink = drink_suggester.suggest_drink(birth_date)
+            drink = None
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                temp_drink = drink_suggester.suggest_drink(birth_date)
+                drink_name = temp_drink.get('name', '')
+                
+                if not history_service.should_avoid(user_id, 'drink', drink_name):
+                    drink = temp_drink
+                    history_service.record_view(user_id, 'drink', drink_name)
+                    break
+            
+            if drink is None:
+                drink = drink_suggester.suggest_drink(birth_date)
+                drink_name = drink.get('name', '')
+                history_service.record_view(user_id, 'drink', drink_name)
         except Exception as e:
             print(f"음료 추천 오류: {e}")
             drink = None
         
-        # 오늘의 꽃 추천
+        # 오늘의 꽃 추천 (중복 회피)
         try:
-            flower = flower_suggester.suggest_flower(birth_date)
+            flower = None
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                temp_flower = flower_suggester.suggest_flower(birth_date)
+                flower_name = temp_flower.get('name', '')
+                
+                if not history_service.should_avoid(user_id, 'flower', flower_name):
+                    flower = temp_flower
+                    history_service.record_view(user_id, 'flower', flower_name)
+                    break
+            
+            if flower is None:
+                flower = flower_suggester.suggest_flower(birth_date)
+                flower_name = flower.get('name', '')
+                history_service.record_view(user_id, 'flower', flower_name)
         except Exception as e:
             print(f"꽃 추천 오류: {e}")
             flower = None
         
-        # 오늘의 인사말 추천
+        # 오늘의 인사말 추천 (중복 회피)
         try:
-            greeting = greeting_suggester.suggest_greeting(birth_date)
+            greeting = None
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                temp_greeting = greeting_suggester.suggest_greeting(birth_date)
+                greeting_text = temp_greeting.get('text', '')
+                greeting_id = history_service.get_content_hash(greeting_text)
+                
+                if not history_service.should_avoid(user_id, 'greeting', greeting_id):
+                    greeting = temp_greeting
+                    history_service.record_view(user_id, 'greeting', greeting_id)
+                    break
+            
+            if greeting is None:
+                greeting = greeting_suggester.suggest_greeting(birth_date)
+                greeting_text = greeting.get('text', '')
+                greeting_id = history_service.get_content_hash(greeting_text)
+                history_service.record_view(user_id, 'greeting', greeting_id)
         except Exception as e:
             print(f"인사말 추천 오류: {e}")
             greeting = None
         
-        # 오늘의 쇼핑 아이템 추천
+        # 오늘의 쇼핑 아이템 추천 (중복 회피)
         try:
-            shopping_items = shopping_suggester.suggest_shopping_items(birth_date, num_items=1)
+            shopping_items = []
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                temp_items = shopping_suggester.suggest_shopping_items(birth_date, num_items=1)
+                if temp_items and len(temp_items) > 0:
+                    item = temp_items[0]
+                    item_title = item.get('title', '')
+                    item_id = history_service.get_content_hash(item_title)
+                    
+                    if not history_service.should_avoid(user_id, 'shopping', item_id):
+                        shopping_items = temp_items
+                        history_service.record_view(user_id, 'shopping', item_id)
+                        break
+            
+            if not shopping_items:
+                shopping_items = shopping_suggester.suggest_shopping_items(birth_date, num_items=1)
+                if shopping_items and len(shopping_items) > 0:
+                    item = shopping_items[0]
+                    item_title = item.get('title', '')
+                    item_id = history_service.get_content_hash(item_title)
+                    history_service.record_view(user_id, 'shopping', item_id)
         except Exception as e:
             print(f"쇼핑 아이템 추천 오류: {e}")
             import traceback
@@ -462,6 +570,61 @@ def redirect_short_url(short_code):
     except Exception as e:
         print(f"리다이렉트 오류: {e}")
         return redirect('/', code=302)
+
+
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    """사용자 히스토리 조회 (조회 기록만)"""
+    try:
+        user_id = request.args.get('user_id', 'default')
+        content_type = request.args.get('content_type')  # 선택적
+        
+        if content_type:
+            viewed = history_service.get_viewed_items(user_id, content_type)
+            return jsonify({
+                'success': True,
+                'data': {
+                    'viewed': viewed
+                }
+            })
+        else:
+            # 전체 히스토리 반환 (조회 기록만)
+            history = history_service.get_full_history(user_id)
+            # preferences 제거
+            if 'preferences' in history:
+                del history['preferences']
+            return jsonify({
+                'success': True,
+                'data': history
+            })
+    except Exception as e:
+        print(f"히스토리 조회 오류: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/history/clear', methods=['POST'])
+def clear_history():
+    """사용자 히스토리 초기화"""
+    try:
+        data = request.json
+        user_id = data.get('user_id', 'default')
+        content_type = data.get('content_type')  # 선택적 (None이면 전체 초기화)
+        
+        history_service.clear_history(user_id, content_type)
+        
+        return jsonify({
+            'success': True,
+            'message': '히스토리가 초기화되었습니다.'
+        })
+    except Exception as e:
+        print(f"히스토리 초기화 오류: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @app.route('/og-image')
