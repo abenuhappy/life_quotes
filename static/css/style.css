@@ -142,7 +142,7 @@ input {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #d4b44a;
+    background: linear-gradient(135deg, #FF7F50 0%, #FF6B6B 100%); /* 코랄 그라데이션 */
     min-height: 100vh;
     padding: 16px;
     color: var(--foreground);
@@ -375,7 +375,7 @@ header h1 {
     .top-menu {
         gap: 16px;
         padding: 16px;
-        margin: 0 -16px 0 -16px;
+        margin: 0 -16px 20px -16px;
         flex-wrap: nowrap;
     }
     
@@ -745,7 +745,7 @@ section {
 }
 
 .quote-card {
-    background: linear-gradient(to bottom right, #b8984a, #a08840); /* bg-gradient-to-br from-[#b8984a] to-[#a08840] */
+    background: linear-gradient(to bottom right, #FF7F50, #FF6B6B); /* 코랄 그라데이션 */
     color: white;
     padding: 32px; /* p-8 */
     border-radius: 1rem; /* rounded-2xl */

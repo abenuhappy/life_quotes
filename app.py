@@ -335,28 +335,16 @@ def get_daily():
                 'error': f'명언을 가져오는 중 오류가 발생했습니다: {str(e)}'
             }), 500
         
-        # 오늘의 컬러 추천 (중복 회피)
+        # 오늘의 컬러 추천 (날짜 기반 고정, 중복 회피는 다른 날짜에만 적용)
         try:
-            color = None
-            max_attempts = 10
-            for attempt in range(max_attempts):
-                # 날짜 기반 컬러 가져오기
-                date_str = get_kst_now().strftime('%Y-%m-%d')
-                # 시도 횟수를 시드에 추가
-                temp_color = color_suggester.suggest_color(birth_date, date_str=f"{date_str}_{attempt}")
-                color_name = temp_color.get('name', '')
-                
-                # 중복 회피 확인
-                if not history_service.should_avoid(user_id, 'color', color_name):
-                    color = temp_color
-                    history_service.record_view(user_id, 'color', color_name)
-                    break
+            # 오늘 날짜로 색상 가져오기 (같은 날짜에는 항상 같은 색상)
+            date_str = get_kst_now().strftime('%Y-%m-%d')
+            color = color_suggester.suggest_color(birth_date, date_str=date_str)
+            color_name = color.get('name', '')
             
-            # 모든 시도 실패 시 마지막 컬러 사용
-            if color is None:
-                color = color_suggester.suggest_color(birth_date)
-                color_name = color.get('name', '')
-                history_service.record_view(user_id, 'color', color_name)
+            # 오늘 날짜의 색상은 항상 사용 (날짜 기반 고정)
+            # 히스토리 기록은 하지 않음 (같은 날짜에는 항상 같은 색상이 나와야 하므로)
+            # 중복 회피는 다음 날짜의 색상 선택 시에만 적용됨
         except Exception as e:
             print(f"컬러 추천 오류: {e}")
             color = None

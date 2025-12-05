@@ -145,12 +145,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 생년월일 정보 가져오기 (공유용)
     try {
         const response = await fetch(`${API_BASE}/api/birthday/${userId}`);
-        const data = await response.json();
-        if (data.success && data.data.birth_date) {
-            currentBirthDate = data.data.birth_date;
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data.birth_date) {
+                currentBirthDate = data.data.birth_date;
+            }
         }
+        // 404는 생년월일이 없는 정상적인 경우이므로 조용히 처리
     } catch (error) {
-        console.error('생년월일 조회 오류:', error);
+        // 네트워크 에러 등은 조용히 처리 (콘솔 에러 제거)
     }
     
     // 자정 자동 새로고침 설정
@@ -166,6 +169,74 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkDateAndUpdate();
         }
     });
+    
+    // 생년월일 저장 이벤트 리스너 등록 (DOMContentLoaded 안에서)
+    if (birthdayForm) {
+        birthdayForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const birthDate = document.getElementById('birthDate').value;
+            if (!birthDate) {
+                showMessage(birthdayMessage, '생년월일을 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 공유용 데이터 저장
+            currentBirthDate = birthDate;
+            
+            showLoading(true);
+            hideMessage(birthdayMessage);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/birthday`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        birth_date: birthDate
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: '서버 오류가 발생했습니다.' }));
+                    showMessage(birthdayMessage, errorData.error || `저장에 실패했습니다. (${response.status})`, 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(birthdayMessage, '생년월일이 저장되었습니다! 새로운 명언을 불러옵니다...', 'success');
+                    setTimeout(() => {
+                        birthdaySection.style.display = 'none';
+                        quoteSection.style.display = 'block';
+                        updateSubtitle(birthDate);
+                        // 헤더 및 메뉴 표시
+                        const headerSection = document.getElementById('headerSection');
+                        const topMenu = document.getElementById('topMenu');
+                        if (headerSection) {
+                            headerSection.style.display = 'block';
+                        }
+                        if (topMenu) {
+                            topMenu.style.display = 'flex';
+                        }
+                        // 생년월일 변경 시 즉시 새로운 명언 로드
+                        loadDailyQuote();
+                    }, 500);
+                } else {
+                    showMessage(birthdayMessage, data.error || '저장에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('생년월일 저장 오류:', error);
+                showMessage(birthdayMessage, '오류가 발생했습니다: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+    }
     
     // 탭 메뉴 클릭 시 해당 섹션으로 스크롤 및 active 상태 관리
     const tabItems = document.querySelectorAll('.tab-item');
@@ -251,6 +322,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkSavedBirthday() {
     try {
         const response = await fetch(`${API_BASE}/api/birthday/${userId}`);
+        if (!response.ok) {
+            // 404는 생년월일이 없는 정상적인 경우이므로 조용히 처리
+            if (response.status === 404) {
+                return false;
+            }
+            // 다른 에러는 로그만 남기고 false 반환
+            console.warn('생년월일 확인 실패:', response.status);
+            return false;
+        }
         const data = await response.json();
         if (data.success && data.data.birth_date) {
             updateSubtitle(data.data.birth_date);
@@ -258,7 +338,7 @@ async function checkSavedBirthday() {
         }
         return false;
     } catch (error) {
-        console.error('생년월일 확인 오류:', error);
+        // 네트워크 에러 등은 조용히 처리 (콘솔 에러 제거)
         return false;
     }
 }
@@ -271,9 +351,14 @@ async function updateSubtitle(birthDate = null) {
         // 생년월일 가져오기
         try {
             const response = await fetch(`${API_BASE}/api/birthday/${userId}`);
-            const data = await response.json();
-            if (data.success && data.data.birth_date) {
-                birthDate = data.data.birth_date;
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data.birth_date) {
+                    birthDate = data.data.birth_date;
+                } else {
+                    subtitle.textContent = '생년월일에 맞춘 매일 다른 명언 또는 시를 제공합니다';
+                    return;
+                }
             } else {
                 subtitle.textContent = '생년월일에 맞춘 매일 다른 명언 또는 시를 제공합니다';
                 return;
@@ -297,63 +382,6 @@ async function updateSubtitle(birthDate = null) {
     }
 }
 
-// 생년월일 저장
-birthdayForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const birthDate = document.getElementById('birthDate').value;
-    if (!birthDate) {
-        showMessage(birthdayMessage, '생년월일을 입력해주세요.', 'error');
-        return;
-    }
-    
-    // 공유용 데이터 저장
-    currentBirthDate = birthDate;
-    
-    showLoading(true);
-    hideMessage(birthdayMessage);
-    
-    try {
-        const response = await fetch(`${API_BASE}/api/birthday`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                birth_date: birthDate
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showMessage(birthdayMessage, '생년월일이 저장되었습니다! 새로운 명언을 불러옵니다...', 'success');
-            setTimeout(() => {
-                birthdaySection.style.display = 'none';
-                quoteSection.style.display = 'block';
-                updateSubtitle(birthDate);
-                // 헤더 및 메뉴 표시
-                const headerSection = document.getElementById('headerSection');
-                const topMenu = document.getElementById('topMenu');
-                if (headerSection) {
-                    headerSection.style.display = 'block';
-                }
-                if (topMenu) {
-                    topMenu.style.display = 'flex';
-                }
-                // 생년월일 변경 시 즉시 새로운 명언 로드
-                loadDailyQuote();
-            }, 500);
-        } else {
-            showMessage(birthdayMessage, data.error || '저장에 실패했습니다.', 'error');
-        }
-    } catch (error) {
-        showMessage(birthdayMessage, '오류가 발생했습니다: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-});
 
 // 오늘의 명언/시 로드
 async function loadDailyQuote() {
@@ -362,9 +390,37 @@ async function loadDailyQuote() {
     
     try {
         const response = await fetch(`${API_BASE}/api/daily?user_id=${userId}`);
+        
+        if (!response.ok) {
+            // 응답이 실패한 경우 JSON 파싱 시도
+            const errorData = await response.json().catch(() => ({ 
+                error: '서버 오류가 발생했습니다.',
+                requires_birthday: response.status === 400
+            }));
+            
+            if (errorData.requires_birthday || response.status === 400) {
+                // 생년월일 입력 섹션으로 돌아가기
+                birthdaySection.style.display = 'block';
+                quoteSection.style.display = 'none';
+                const headerSection = document.getElementById('headerSection');
+                const topMenu = document.getElementById('topMenu');
+                if (headerSection) {
+                    headerSection.style.display = 'none';
+                }
+                if (topMenu) {
+                    topMenu.style.display = 'none';
+                }
+                showMessage(birthdayMessage, errorData.error || '생년월일을 먼저 입력해주세요.', 'error');
+            } else {
+                showError(errorData.error || '명언을 불러올 수 없습니다.');
+            }
+            showLoading(false);
+            return;
+        }
+        
         const data = await response.json();
         
-            if (data.success) {
+        if (data.success) {
             displayQuote(data.data.quote);
             // 생년월일 분석 숨김 처리
             // if (data.data.analysis) {
@@ -670,10 +726,22 @@ function applyQuoteCardColor(color) {
     const quoteCard = document.getElementById('quoteCard');
     if (!quoteCard) return;
     
+    // color가 없으면 코랄 그라데이션 유지
+    if (!color || !color.hex) {
+        quoteCard.style.background = 'linear-gradient(to bottom right, #FF7F50, #FF6B6B)'; // 코랄 그라데이션
+        quoteCard.style.color = '#ffffff'; // 밝은 텍스트
+        return;
+    }
+    
     const hex = color.hex;
     const rgb = color.rgb || hexToRgb(hex);
     
-    if (!rgb) return;
+    if (!rgb) {
+        // RGB 변환 실패 시 코랄 그라데이션 유지
+        quoteCard.style.background = 'linear-gradient(to bottom right, #FF7F50, #FF6B6B)';
+        quoteCard.style.color = '#ffffff';
+        return;
+    }
     
     // 컬러의 밝기 계산
     const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
@@ -827,13 +895,15 @@ document.getElementById('editBirthdayBtn').addEventListener('click', async () =>
     // 저장된 생년월일 가져오기
     try {
         const response = await fetch(`${API_BASE}/api/birthday/${userId}`);
-        const data = await response.json();
-        
-        if (data.success && data.data.birth_date) {
-            // 기존 생년월일을 입력 필드에 설정
-            document.getElementById('birthDate').value = data.data.birth_date;
-            currentBirthDate = data.data.birth_date;
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data.birth_date) {
+                // 기존 생년월일을 입력 필드에 설정
+                document.getElementById('birthDate').value = data.data.birth_date;
+                currentBirthDate = data.data.birth_date;
+            }
         }
+        // 404는 생년월일이 없는 정상적인 경우이므로 조용히 처리
     } catch (error) {
         console.error('생년월일 조회 오류:', error);
     }
