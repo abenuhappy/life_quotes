@@ -18,6 +18,9 @@
     --theme-gradient-2: #764ba2;
     --theme-rgb: 102, 126, 234;
     
+    /* 통일된 배경색 변수 */
+    --container-bg: rgba(255, 255, 255, 0.95);
+    
     /* 디자인 시스템 변수 */
     --font-size: 16px;
     --background: #ffffff;
@@ -151,7 +154,7 @@ body {
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background: var(--card);
+    background-color: var(--container-bg);
     border-radius: calc(var(--radius) * 2);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     padding: 40px;
@@ -160,11 +163,15 @@ body {
 }
 
 header {
-    background: white;
+    background-color: var(--container-bg);
     padding: 24px;
     text-align: center;
     border-bottom: 1px solid #f3f4f6;
-    margin-bottom: 0;
+    margin: -36px -40px 0 -40px;
+    border-top-left-radius: calc(var(--radius) * 2);
+    border-top-right-radius: calc(var(--radius) * 2);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     position: relative;
 }
 
@@ -233,8 +240,8 @@ header h1 {
     align-items: center;
     gap: 24px;
     padding: 16px 24px;
-    margin-bottom: 30px;
-    background: white;
+    margin: 0 -40px 30px -40px;
+    background-color: var(--container-bg);
     border-bottom: 1px solid #f3f4f6;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -323,6 +330,7 @@ header h1 {
 @media (max-width: 600px) {
     header {
         padding: 16px;
+        margin: 0 -20px 0 -20px;
     }
     
     header h1 {
@@ -345,6 +353,7 @@ header h1 {
     .top-menu {
         gap: 16px;
         padding: 12px 16px;
+        margin: 0 -20px 30px -20px;
         flex-wrap: nowrap;
     }
     
@@ -594,6 +603,54 @@ section {
     animation: slideUp 0.3s ease;
 }
 
+/* Up 버튼 (플로팅) */
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--theme-color, #667eea);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.scroll-to-top-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.scroll-to-top-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: var(--theme-color, #667eea);
+    opacity: 0.9;
+}
+
+.scroll-to-top-btn:active {
+    transform: translateY(-1px);
+}
+
+.scroll-to-top-btn span {
+    line-height: 1;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -624,6 +681,14 @@ section {
     
     .floating-btn-icon {
         font-size: 1.2em;
+    }
+    
+    .scroll-to-top-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
     }
     
     .share-menu {

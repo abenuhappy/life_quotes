@@ -98,6 +98,16 @@ function setupDateCheckInterval() {
 
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
+    // 초기 배경색 설정 (컬러 로드 전에도 동일한 배경색 적용)
+    const root = document.documentElement;
+    root.style.setProperty('--container-bg', 'rgba(255, 255, 255, 0.95)');
+    
+    // 생년월일 섹션이 존재하는지 확인
+    if (!birthdaySection) {
+        console.error('생년월일 섹션을 찾을 수 없습니다.');
+        return;
+    }
+    
     // 저장된 생년월일 확인
     const saved = await checkSavedBirthday();
     if (saved) {
@@ -114,6 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         updateSubtitle();
         loadDailyQuote();
+    } else {
+        // 생년월일이 없으면 입력 섹션 표시
+        birthdaySection.style.display = 'block';
+        quoteSection.style.display = 'none';
     }
     
     // 생년월일 정보 가져오기 (공유용)
@@ -178,6 +192,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
+    
+    // Up 버튼 초기화
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    
+    // 스크롤 이벤트 리스너 - Up 버튼 표시/숨김
+    function handleScroll() {
+        if (scrollToTopBtn) {
+            // 스크롤 위치 확인 (여러 방법으로 호환성 확보)
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+            
+            // 스크롤 위치가 300px 이상이면 버튼 표시
+            if (scrollTop > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        }
+    }
+    
+    // 초기 스크롤 상태 확인
+    handleScroll();
+    
+    // 스크롤 이벤트 등록
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Up 버튼 클릭 이벤트 - 최상단으로 스크롤
+    if (scrollToTopBtn) {
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            // 클릭 후 버튼 숨김
+            scrollToTopBtn.classList.remove('show');
+        });
+    }
     
     // 초기 활성 탭 설정
     if (tabItems.length > 0) {
@@ -634,6 +684,11 @@ function applyColorCardBorder(color) {
 
 // 컬러에 맞춰 화면 톤 변경
 function applyColorTheme(color) {
+    // 생년월일 입력 섹션이 표시되어 있으면 컬러 테마 적용하지 않음
+    if (birthdaySection && birthdaySection.style.display !== 'none') {
+        return;
+    }
+    
     const hex = color.hex;
     const rgb = color.rgb || hexToRgb(hex);
     
@@ -671,17 +726,9 @@ function applyColorTheme(color) {
     // 배경 그라데이션 적용 (UI 톤 사용)
     document.body.style.background = `linear-gradient(135deg, ${uiGradient1} 0%, ${uiGradient2} 100%)`;
     
-    // 컨테이너 배경 조정
-    const container = document.querySelector('.container');
-    if (container) {
-        if (isLight) {
-            // 밝은 컬러면 약간 투명한 흰색
-            container.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-        } else {
-            // 어두운 컬러면 더 불투명한 흰색 (가독성 향상)
-            container.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
-        }
-    }
+    // 컨테이너 배경 조정 - CSS 변수 사용
+    const bgColor = isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.98)';
+    root.style.setProperty('--container-bg', bgColor);
 }
 
 // HEX를 RGB로 변환
